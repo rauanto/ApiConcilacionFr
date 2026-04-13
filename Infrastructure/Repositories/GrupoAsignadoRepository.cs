@@ -13,12 +13,19 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
 
     private readonly IAuditHelper _auditHelper;
 
+
+
+
     public GrupoAsignadoRepository(IDbConnectionFactory connectionFactory, IAuditHelper auditHelper)
     {
         _connectionFactory = connectionFactory;
         _auditHelper = auditHelper;
     }
-
+    
+    /// <summary>
+    /// Obtiene todos los grupos asignados.
+    /// </summary>
+    /// <returns>Una colección de objetos GrupoAsignado.</returns>
     public async Task<IEnumerable<GrupoAsignado>> GetAllAsync()
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
@@ -30,6 +37,11 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
         return await connection.QueryAsync<GrupoAsignado>(sql);
     }
 
+    /// <summary>
+    /// Obtiene los grupos asignados a un usuario específico.
+    /// </summary>
+    /// <param name="usuarioId">El ID del usuario.</param>
+    /// <returns>Una colección de objetos GrupoAsignado.</returns>
     public async Task<IEnumerable<GrupoAsignado>> GetByUsuarioIdAsync(int usuarioId)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
@@ -42,6 +54,11 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
         return await connection.QueryAsync<GrupoAsignado>(sql, new { UsuarioId = usuarioId });
     }
 
+    /// <summary>
+    /// Obtiene un grupo asignado por su ID.
+    /// </summary>
+    /// <param name="sGrupo">El ID del grupo.</param>
+    /// <returns>El objeto GrupoAsignado si se encuentra, de lo contrario null.</returns>
     public async Task<GrupoAsignado?> GetByIdAsync(string sGrupo)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
@@ -54,6 +71,11 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
         return await connection.QuerySingleOrDefaultAsync<GrupoAsignado>(sql, new { SGrupo = sGrupo });
     }
 
+    /// <summary>
+    /// Crea un nuevo grupo asignado.
+    /// </summary>
+    /// <param name="grupo">El objeto GrupoAsignado a crear.</param>
+    /// <returns>True si la creación fue exitosa, de lo contrario false.</returns>
     public async Task<bool> CreateAsync(GrupoAsignado grupo)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
@@ -67,7 +89,11 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
 
 
     
-
+    /// <summary>
+    /// Actualiza un grupo asignado existente.
+    /// </summary>
+    /// <param name="grupo">El objeto GrupoAsignado con los datos actualizados.</param>
+    /// <returns>True si la actualización fue exitosa, de lo contrario false.</returns>
     public async Task<bool> UpdateAsync(GrupoAsignado grupo)
     {
         var estadoAnterior = await GetByIdAsync(grupo.S_GRUPO);
@@ -91,7 +117,12 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
     }
 
 
-
+    /// <summary>
+    /// Actualiza parcialmente el nombre de un grupo asignado.
+    /// </summary>
+    /// <param name="sGrupo">El ID del grupo.</param>
+    /// <param name="nuevoNombre">El nuevo nombre del grupo.</param>
+    /// <returns>True si la actualización fue exitosa, de lo contrario false.</returns>
     public async Task<bool> PatchNombreAsync(string sGrupo, string nuevoNombre)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
@@ -104,6 +135,11 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
         return rows > 0;
     }
 
+    /// <summary>
+    /// Elimina un grupo asignado.
+    /// </summary>
+    /// <param name="sGrupo">El ID del grupo a eliminar.</param>
+    /// <returns>True si la eliminación fue exitosa, de lo contrario false.</returns>
     public async Task<bool> DeleteAsync(string sGrupo)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
