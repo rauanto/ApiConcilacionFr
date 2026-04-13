@@ -1,6 +1,7 @@
 // Infrastructure/Repositories/GrupoAsignadoRepository.cs
 using ApiConcilacionFr.Core.Interfaces;
 using ApiConcilacionFr.Domain.Entities;
+using ApiConcilacionFr.Core.Services;
 using ApiConcilacionFr.Infrastructure.Database;
 using Dapper;
 
@@ -10,9 +11,12 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
 {
     private readonly IDbConnectionFactory _connectionFactory;
 
-    public GrupoAsignadoRepository(IDbConnectionFactory connectionFactory)
+    private readonly IAuditHelper _auditHelper;
+
+    public GrupoAsignadoRepository(IDbConnectionFactory connectionFactory, IAuditHelper auditHelper)
     {
         _connectionFactory = connectionFactory;
+        _auditHelper = auditHelper;
     }
 
     public async Task<IEnumerable<GrupoAsignado>> GetAllAsync()
@@ -61,18 +65,30 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
         return rows > 0;
     }
 
+
+    
+
     public async Task<bool> UpdateAsync(GrupoAsignado grupo)
     {
-        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = @"
-            UPDATE autentificacion.grupo_asignado 
-            SET nombre_grupo = @nombre_grupo, usuario_id = @usuario_id 
-            WHERE S_GRUPO = @S_GRUPO";
+        var estadoAnterior = await GetByIdAsync(grupo.S_GRUPO);
 
-        var rows = await connection.ExecuteAsync(sql, grupo);
-        return rows > 0;
+        await _auditHelper.ExecuteWithAuditAsync(
+            "GrupoAsignado", 
+            grupo.S_GRUPO, 
+            "UPDATE", 
+            estadoAnterior, 
+            grupo, 
+            async () => 
+            {
+                using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+                var sql = @"UPDATE autentificacion.grupo_asignado 
+                            SET nombre_grupo = @nombre_grupo, usuario_id = @usuario_id 
+                            WHERE S_GRUPO = @S_GRUPO";
+                await connection.ExecuteAsync(sql, grupo);
+            });
+
+        return true;
     }
-
 
 
 

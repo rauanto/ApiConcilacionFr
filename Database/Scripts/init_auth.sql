@@ -27,3 +27,18 @@ CREATE TABLE IF NOT EXISTS grupo_asignado (
     usuario_id INT NOT NULL,               -- Relación con la tabla Usuarios
     FOREIGN KEY (usuario_id) REFERENCES Usuarios(Id) ON DELETE CASCADE
 );
+
+
+
+
+USE autentificacion;
+CREATE TABLE IF NOT EXISTS AuditoriaRegistros (
+                                                  Id INT AUTO_INCREMENT PRIMARY KEY,
+                                                  Entidad VARCHAR(100),
+                                                  EntidadId VARCHAR(50),
+                                                  Operacion VARCHAR(20),
+                                                  Data JSON, -- O el nombre que configuraste en JsonColumnName
+                                                  UsuarioResponsable VARCHAR(100),
+                                                  FechaEvento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

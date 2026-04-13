@@ -7,6 +7,11 @@ using ApiConcilacionFr.Core.Interfaces;
 using ApiConcilacionFr.Core.Services;
 using ApiConcilacionFr.Infrastructure.Auth;
 using ApiConcilacionFr.Infrastructure.Repositories;
+using Audit.Core;
+using Audit.MySql;
+using Audit.WebApi;
+
+
 
 // ── Serilog ──────────────────────────────────────────────────────────────────
 Log.Logger = new LoggerConfiguration()
@@ -18,15 +23,31 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.File("logs/api-.log", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
-
-
-
-
-
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+// Registrar el helper
+builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
 
+    // Configurar Audit.NET para MySQL
+    // Program.cs
+    var auditConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    // Forzamos que la conexión de auditoría use el esquema correcto ignorando el default
+    if (!auditConnectionString.Contains("Database=autentificacion"))
+    {
+        // Reemplazamos el database original por el de autentificacion solo para los logs
+        auditConnectionString = auditConnectionString.Replace("creditos_fincrece_conciliacion", "autentificacion");
+    }
+
+    Audit.Core.Configuration.Setup()
+        .UseMySql(config => config
+            .ConnectionString(auditConnectionString)
+            .TableName("auditoriaregistros") // Ya no necesitas poner el punto ni el esquema aquí
+            .IdColumnName("Id")
+            .JsonColumnName("Data")
+            .CustomColumn("Entidad", ev => ev.CustomFields["Entidad"])
+            .CustomColumn("Operacion", ev => ev.EventType)
+            .CustomColumn("UsuarioResponsable", ev => ev.CustomFields["Usuario"]));
 
     builder.Host.UseSerilog();
 
@@ -36,7 +57,9 @@ try
     builder.Services.AddSwaggerGen();
     // Connection Factory — MySQL
     builder.Services.AddSingleton<IDbConnectionFactory, MySqlConnectionFactory>();
-
+    // Habilitar IHttpContextAccessor
+    builder.Services.AddHttpContextAccessor(); // Habilita el acceso al HttpContext
+    builder.Services.AddScoped<IAuditHelper, AuditHelper>(); // Cambiado a Scoped para usar el contexto del usuario
     // Health Checks
     builder.Services.AddHealthChecks()
         .AddCheck<DatabaseHealthCheck>("mysql", tags: new[] { "db", "ready" });
