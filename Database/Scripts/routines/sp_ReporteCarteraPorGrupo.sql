@@ -72,17 +72,22 @@ BEGIN
             (SELECT SUM(ROUND((Amortiza.A_IMPORTE - CO_IMPORTE) * (PQ_PTOS_TASA_NORMAL * PQ_SOBRE_TASA_MORATORIA) / (360 * 100) * DATEDIFF(CURDATE(), A_FECHA_VENCIMIENTO), 2)) FROM Amortiza, Cobros WHERE Amortiza.A_FECHA_LIQUIDACION = '9999-12-31' AND A_FECHA_VENCIMIENTO < CURDATE() AND Amortiza.PQ_CLAVE = Prestamo.PQ_CLAVE AND Cobros.A_NUMERO = Amortiza.A_NUMERO AND Cobros.PQ_CLAVE = Prestamo.PQ_CLAVE) AS calculo_interes_moratorio,
             Socios.S_NOMBRE, Prestamo.PQ_LITIGIO,
             CASE WHEN Prestamo.PQ_DOCUMENTO_RENOVO = 0 THEN 'no castigado' ELSE 'castigado' END AS estatus,
-            CASE WHEN Prestamo.PQ_CART_VENCIDA = 1 THEN 'cartera_vencida_contable' ELSE 'sin agregar' END AS cartera_vencida_contable,
+            // se cambio el estatus a agregado en vez de cartera_vencida_contable
+            CASE WHEN Prestamo.PQ_CART_VENCIDA = 1 THEN 'agregado' ELSE 'sin agregar' END AS cartera_vencida_contable,
             CASE WHEN Prestamo.PQ_LITIGIO = 1 THEN 'demandado' ELSE 'sin demanda' END AS demanda,
-            CASE
-                WHEN Socios.S_GRUPO IN (990031,990033,990070,990071,990072,990075,990077,990079,990086,990088,990095,990110,990111,990123,990127,990128,990143,990144,990145,990146,990147,990148,990149,990150,990151,990152,990153,990154,990156,990159,990160,990162,990164,990165,990168) THEN 'Neivi'
-                WHEN Socios.S_GRUPO IN (990038,990042,990043,990044,990045,990047,990048,990049,990050,990051,990053,990054,990055,990056,990057,990058,990060,990061,990063,990064,990065,990066,990067,990068,990090,990091,990093,990100,990117,990131,990132,990133,990134,990135,990157,990158,990161,990163) THEN 'Julian'
-                WHEN Socios.S_GRUPO IN (990037,990040,990069,990099,990103,990109,990112,990121,990122) THEN 'Juan Miguel'
-                WHEN Socios.S_GRUPO IN (990035,990036,990073,990074,990078,990082,990083,990087,990089,990092,990096,990113,990114,990115,990116,990118,990119,990140,990155,990166,990167) THEN 'Juan de Dios'
-                WHEN Socios.S_GRUPO IN (990034,990039,990094,990102,990120,990125,990126,990136,990137,990138,990139) THEN 'Amairani'
-                WHEN Socios.S_GRUPO IN (990101,990000,990028,990029,990030,990032,990041,990046,990052,990059,990062,990080,990081,990097,990124,990129) THEN 'Sin asignacion'
-                ELSE 'No identificado'
-            END AS ejecutivo_asignado
+            /* ============================================================
+               EJECUTIVO ASIGNADO — dinámico desde grupo_asignado + Usuarios
+               ============================================================ */
+            IFNULL(
+                (
+                    SELECT COALESCE(u.NombreUsuario, 'Sin asignacion')
+                    FROM autentificacion.grupo_asignado ga
+                    LEFT JOIN autentificacion.Usuarios u ON u.Id = ga.usuario_id
+                    WHERE ga.S_GRUPO = Socios.S_GRUPO
+                    LIMIT 1
+                ),
+                'No identificado'
+            ) AS ejecutivo_asignado
         FROM Socios
         INNER JOIN Prestamo ON Socios.S_CLAVE = Prestamo.S_CLAVE
         INNER JOIN Amortiza ON Amortiza.PQ_CLAVE = Prestamo.PQ_CLAVE
