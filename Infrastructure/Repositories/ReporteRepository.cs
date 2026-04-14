@@ -46,4 +46,13 @@ public class ReporteRepository : IReporteRepository
         var sql = "CALL sp_obtener_amortizacion(@PqClave);";
         return await connection.QueryAsync<Amortizacion>(sql, new { PqClave = pqClave });
     }
+
+    #region Liquidados por grupo y nombre
+    public async Task<IEnumerable<ReporteLiquidadosgrupo>> GetLiquidadosGrupoAsync(DateTime fechaInicio, string rol, int usuarioId)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        var sql = "CALL sp_reporte_liquidados_grupo(@FechaInicio,@Rol,@UsuarioId);";
+        return await connection.QueryAsync<ReporteLiquidadosgrupo>(sql, new { FechaInicio = fechaInicio, Rol = rol, UsuarioId = usuarioId });
+    }
+    #endregion
 }

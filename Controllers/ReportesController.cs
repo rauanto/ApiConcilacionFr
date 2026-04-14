@@ -72,4 +72,34 @@ public class ReportesController : ControllerBase
 
         return Ok(ApiResponse<IEnumerable<Amortizacion>>.Success(resultado, "Amortización obtenida con éxito."));
     }
+
+    #region Liquidados Por grupo y Nombre
+    /// <summary>
+    /// Obtiene el reporte de liquidados por grupo pasándole la fecha de inicio, el usuario y el rol.
+    /// </summary>
+    [HttpGet("liquidadosGrupo")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteLiquidadosgrupo>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetLiquidadosGrupo([FromQuery] DateTime fechaInicio)
+    {
+
+        var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+                           ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+        {
+            return Unauthorized(ApiResponse<object>.Failure("Token inválido o mal formado."));
+        }
+
+        if (fechaInicio == DateTime.MinValue)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar una fecha de inicio válida."));
+        }
+
+
+        var resultado = await _reporteRepo.GetLiquidadosGrupoAsync(fechaInicio, rolName, userId);
+
+        return Ok(ApiResponse<IEnumerable<ReporteLiquidadosgrupo>>.Success(resultado, "Reporte de liquidados por grupo obtenido con éxito."));
+    }
+    #endregion
 }

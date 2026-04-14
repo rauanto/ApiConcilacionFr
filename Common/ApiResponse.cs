@@ -13,6 +13,8 @@ public class ApiResponse<T>
     public PaginationMeta? Pagination { get; init; }
     public DateTime Timestamp { get; init; } = DateTime.UtcNow;
 
+    
+
     // ── Factories ──────────────────────────────────────────────────────────────
 
     /// <summary>Respuesta exitosa con datos</summary>

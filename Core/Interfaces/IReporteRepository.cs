@@ -8,4 +8,6 @@ public interface IReporteRepository
     Task<IEnumerable<ReporteCartera>> GetCarteraPorGrupoAsync(string grupos);
     Task<IEnumerable<ReporteCarteraEjecutivo>> GetCarteraEjecutivosAsync(int usuarioId, string rol);
     Task<IEnumerable<Amortizacion>> ObtenerAmortizacionAsync(int pqClave);
+
+    Task<IEnumerable<ReporteLiquidadosgrupo>> GetLiquidadosGrupoAsync(DateTime fechaInicio, string rol, int usuarioId);
 }
