@@ -39,7 +39,7 @@ public class ReportesController : ControllerBase
 
         return Ok(ApiResponse<ReporteCarteraResponse>.Success(response, "Reporte de cartera generado con éxito."));
     }
-
+    
     /// <summary>
     /// Obtiene el reporte de cartera de ejecutivos (dependiendo del rol del usuario).
     /// </summary>
@@ -101,5 +101,35 @@ public class ReportesController : ControllerBase
 
         return Ok(ApiResponse<IEnumerable<ReporteLiquidadosgrupo>>.Success(resultado, "Reporte de liquidados por grupo obtenido con éxito."));
     }
+
+    [HttpGet("liquidadosAcreditados")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteLiquidadosAcreditados>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetLiquidadosAcreditados([FromQuery] DateTime fechaInicio, [FromQuery] int grupo)
+    {
+        var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+                           ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+        {
+            return Unauthorized(ApiResponse<object>.Failure("Token inválido o mal formado."));
+        }
+
+        if (fechaInicio == DateTime.MinValue)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar una fecha de inicio válida."));
+        }
+
+        if (grupo == 0)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un grupo válido."));
+        }
+
+        var resultado = await _reporteRepo.GetLiquidadosAcreditadosAsync(fechaInicio, rolName, userId, grupo);
+
+        return Ok(ApiResponse<IEnumerable<ReporteLiquidadosAcreditados>>.Success(resultado, "Reporte de liquidados por grupo obtenido con éxito."));
+    }
+
+
     #endregion
 }

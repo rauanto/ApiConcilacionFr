@@ -54,5 +54,13 @@ public class ReporteRepository : IReporteRepository
         var sql = "CALL sp_reporte_liquidados_grupo(@FechaInicio,@Rol,@UsuarioId);";
         return await connection.QueryAsync<ReporteLiquidadosgrupo>(sql, new { FechaInicio = fechaInicio, Rol = rol, UsuarioId = usuarioId });
     }
+
+    public async Task<IEnumerable<ReporteLiquidadosAcreditados>> GetLiquidadosAcreditadosAsync(DateTime fechaInicio, string rol, int usuarioId, int grupo)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        var sql = "CALL sp_reporte_liquidados_grupo_acreditados(@FechaInicio,@Rol,@UsuarioId,@Grupo);";
+        return await connection.QueryAsync<ReporteLiquidadosAcreditados>(sql, new { FechaInicio = fechaInicio, Rol = rol, UsuarioId = usuarioId, Grupo = grupo });
+    }
+
     #endregion
 }

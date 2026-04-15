@@ -10,4 +10,6 @@ public interface IReporteRepository
     Task<IEnumerable<Amortizacion>> ObtenerAmortizacionAsync(int pqClave);
 
     Task<IEnumerable<ReporteLiquidadosgrupo>> GetLiquidadosGrupoAsync(DateTime fechaInicio, string rol, int usuarioId);
+
+    Task<IEnumerable<ReporteLiquidadosAcreditados>> GetLiquidadosAcreditadosAsync(DateTime fechaInicio, string rol, int usuarioId, int grupo);
 }
