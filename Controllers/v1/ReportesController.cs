@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace ApiConcilacionFr.Controllers;
+namespace ApiConcilacionFr.Controllers.v1;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 [Authorize]
 public class ReportesController : ControllerBase
 {

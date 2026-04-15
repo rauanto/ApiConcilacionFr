@@ -42,3 +42,16 @@ CREATE TABLE IF NOT EXISTS AuditoriaRegistros (
     FechaEvento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE reporte_cartera_historico (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fecha_corte DATE NOT NULL,              -- El último día del mes que se reporta
+    fecha_registro DATETIME DEFAULT NOW(),  -- Cuándo se ejecutó el proceso
+    ejecutivo_asignado VARCHAR(100),
+    total_clientes INT,
+    total_prestamos INT,
+    monto_colocado DECIMAL(18,2),
+    saldo_cartera DECIMAL(18,2),
+    capital_vencido DECIMAL(18,2),
+    saldo_final DECIMAL(18,2),
+    porcentaje_calidad DECIMAL(5,2)
+);
