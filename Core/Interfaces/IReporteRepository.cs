@@ -12,4 +12,6 @@ public interface IReporteRepository
     Task<IEnumerable<ReporteLiquidadosgrupo>> GetLiquidadosGrupoAsync(DateTime fechaInicio, string rol, int usuarioId);
 
     Task<IEnumerable<ReporteLiquidadosAcreditados>> GetLiquidadosAcreditadosAsync(DateTime fechaInicio, string rol, int usuarioId, int grupo);
+
+    Task<IEnumerable<ReporteCarteraEjecutivoHistorico>> GetCarteraEjecutivoHistoricoAsync(int mes, int anio, int usuarioId, string rol);
 }
