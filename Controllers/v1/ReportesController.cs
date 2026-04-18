@@ -132,4 +132,60 @@ public class ReportesController : ControllerBase
 
 
     #endregion
+
+    #region Otorgados por grupo y nombre
+    [HttpGet("otorgadosGrupo")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteOtorgadosGrupo>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOtorgadosGrupo([FromQuery] DateTime fechaInicio)
+    {
+
+        var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+                           ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+        {
+            return Unauthorized(ApiResponse<object>.Failure("Token inválido o mal formado."));
+        }
+
+        if (fechaInicio == DateTime.MinValue)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar una fecha de inicio válida."));
+        }
+
+
+        var resultado = await _reporteRepo.GetOtorgadosGrupoAsync(fechaInicio, rolName, userId);
+
+        return Ok(ApiResponse<IEnumerable<ReporteOtorgadosGrupo>>.Success(resultado, "Reporte de otorgados por grupo obtenido con éxito."));
+    }
+
+    [HttpGet("otorgadosAcreditados")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteOtorgadosAcreditados>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOtorgadosAcreditados([FromQuery] DateTime fechaInicio, [FromQuery] int grupo)
+    {
+        var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+                           ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+        {
+            return Unauthorized(ApiResponse<object>.Failure("Token inválido o mal formado."));
+        }
+
+        if (fechaInicio == DateTime.MinValue)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar una fecha de inicio válida."));
+        }
+
+        if (grupo == 0)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un grupo válido."));
+        }
+
+        var resultado = await _reporteRepo.GetOtorgadosAcreditadosAsync(fechaInicio, rolName, userId, grupo);
+
+        return Ok(ApiResponse<IEnumerable<ReporteOtorgadosAcreditados>>.Success(resultado, "Reporte de otorgados por grupo obtenido con éxito."));
+    }
+
+    #endregion
 }

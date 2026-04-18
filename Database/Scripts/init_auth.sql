@@ -12,19 +12,15 @@ CREATE TABLE IF NOT EXISTS Usuarios (
     FechaCreacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insertar un usuario administrador por defecto
--- PasswordHash para "admin123" generado con BCrypt de C# (es un ejemplo, debería cambiarse al loguear/registrar).
--- Un hash BCrypt valido generico para admin123 (Work Factor 11): 
--- $2a$11$F6n1q7j.1mQO2d27.D2.VumU18V//z4/Lw9pT0T1Z1.xX/Wl82cHO  
-INSERT INTO Usuarios (NombreUsuario, Correo, PasswordHash, Rol)
-VALUES ('admin', 'admin@fincrece.com', '$2a$11$F6n1q7j.1mQO2d27.D2.VumU18V//z4/Lw9pT0T1Z1.xX/Wl82cHO', 'Admin')
+
+
 ON DUPLICATE KEY UPDATE Id=Id;
 
 -- ── Nueva tabla grupo_asignado ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS grupo_asignado (
     S_GRUPO INT PRIMARY KEY,       -- ID manual, no consecutivo
     nombre_grupo VARCHAR(150) NOT NULL,
-    usuario_id INT NOT NULL,               -- Relación con la tabla Usuarios
+    usuario_id INT ,               -- Relación con la tabla Usuarios
     FOREIGN KEY (usuario_id) REFERENCES Usuarios(Id) ON DELETE CASCADE
 );
 
@@ -37,15 +33,15 @@ CREATE TABLE IF NOT EXISTS AuditoriaRegistros (
     Entidad VARCHAR(100),
     EntidadId VARCHAR(50),
     Operacion VARCHAR(20),
-    Data JSON, -- O el nombre que configuraste en JsonColumnName
+    Data TEXT, 
     UsuarioResponsable VARCHAR(100),
     FechaEvento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE reporte_cartera_historico (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    fecha_corte DATE NOT NULL,              -- El último día del mes que se reporta
-    fecha_registro DATETIME DEFAULT NOW(),  -- Cuándo se ejecutó el proceso
+    fecha_corte DATE NOT NULL,              
+    fecha_registro DATETIME DEFAULT NOW(),  
     ejecutivo_asignado VARCHAR(100),
     total_clientes INT,
     total_prestamos INT,

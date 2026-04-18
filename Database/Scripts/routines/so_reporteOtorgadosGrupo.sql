@@ -34,7 +34,7 @@ BEGIN
 
         WHERE Pobla.P_CLAVE BETWEEN 990000 AND 994999
           AND Prestamo.PQ_DOCUMENTO_RENOVO = 0
-          AND Prestamo.PQ_FECHA_OPERACION >= '2026-02-28'
+          AND Prestamo.PQ_FECHA_OPERACION >= p_fecha_inicio
           AND Prestamo.PQ_FECHA_OPERACION <> Prestamo.PQ_FECHA_LIQUIDACION
         GROUP BY Socios.S_GRUPO,
                  Pobla.P_NOMBRE,
@@ -72,7 +72,7 @@ BEGIN
         WHERE ga_filtro.usuario_id = p_id_usuario and
     Pobla.P_CLAVE BETWEEN 990000 AND 994999
     AND Prestamo.PQ_DOCUMENTO_RENOVO = 0
-    AND Prestamo.PQ_FECHA_OPERACION >= '2026-02-28'
+    AND Prestamo.PQ_FECHA_OPERACION >= p_fecha_inicio
 AND Prestamo.PQ_FECHA_OPERACION<>Prestamo.PQ_FECHA_LIQUIDACION
 GROUP BY
     Socios.S_GRUPO,

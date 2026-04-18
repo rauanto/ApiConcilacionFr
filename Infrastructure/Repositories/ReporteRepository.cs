@@ -62,5 +62,34 @@ public class ReporteRepository : IReporteRepository
         return await connection.QueryAsync<ReporteLiquidadosAcreditados>(sql, new { FechaInicio = fechaInicio, Rol = rol, UsuarioId = usuarioId, Grupo = grupo });
     }
 
+
+    #endregion
+
+
+
+    #region Historico Cartera
+    public async Task<IEnumerable<ReporteCarteraEjecutivoHistorico>> GetCarteraEjecutivoHistoricoAsync(int mes, int anio, int usuarioId, string rol)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        var sql = "CALL sp_consultar_historico_cartera(@p_mes, @p_anio, @p_usuario_id, @p_rol);";
+        return await connection.QueryAsync<ReporteCarteraEjecutivoHistorico>(sql, new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol });
+    }
+    #endregion
+
+    #region Otorgados por grupo y nombre
+    public async Task<IEnumerable<ReporteOtorgadosGrupo>> GetOtorgadosGrupoAsync(DateTime fechaInicio, string rol, int usuarioId)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        var sql = "CALL sp_reporte_otorgados_grupo(@FechaInicio,@Rol,@UsuarioId);";
+        return await connection.QueryAsync<ReporteOtorgadosGrupo>(sql, new { FechaInicio = fechaInicio, Rol = rol, UsuarioId = usuarioId });
+    }
+
+    public async Task<IEnumerable<ReporteOtorgadosAcreditados>> GetOtorgadosAcreditadosAsync(DateTime fechaInicio, string rol, int usuarioId, int grupo)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        var sql = "CALL sp_reporte_otorgados_grupo_acreditados(@FechaInicio,@Rol,@UsuarioId,@Grupo);";
+        return await connection.QueryAsync<ReporteOtorgadosAcreditados>(sql, new { FechaInicio = fechaInicio, Rol = rol, UsuarioId = usuarioId, Grupo = grupo });
+    }
+
     #endregion
 }

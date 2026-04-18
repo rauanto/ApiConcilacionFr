@@ -13,6 +13,6 @@ public class ReporteCarteraEjecutivoHistorico
     public double? porcentaje_calidad { get; set; }
 
     public int Id { get; set; }
-    public DateTime FechaCorte { get; set; }
-    public DateTime FechaRegistro { get; set; }
+    public DateTime fecha_corte { get; set; }
+    public DateTime fecha_registro { get; set; }
 }
