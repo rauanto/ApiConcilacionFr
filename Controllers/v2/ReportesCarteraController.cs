@@ -22,7 +22,7 @@ public class ReportesCarteraController : ControllerBase
 
     [HttpGet("historicoCartera")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteCarteraEjecutivoHistorico>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetHistoricoCartera([FromQuery] int mes, [FromQuery] int anio)
+    public async Task<IActionResult> GetHistoricoCartera([FromQuery] int mes, [FromQuery] int anio,[FromQuery] int tipoReporte)
     {
         var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
         var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
@@ -38,7 +38,12 @@ public class ReportesCarteraController : ControllerBase
             return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un mes y un año válidos."));
         }
 
-        var resultado = await _reporteRepo.GetCarteraEjecutivoHistoricoAsync(mes, anio, userId, rolName);
+        if (tipoReporte == 0)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un tipo de reporte válido."));
+        }
+
+        var resultado = await _reporteRepo.GetCarteraEjecutivoHistoricoAsync(mes, anio, userId, rolName,tipoReporte);
 
         return Ok(ApiResponse<IEnumerable<ReporteCarteraEjecutivoHistorico>>.Success(resultado, "Reporte de cartera histórico generado con éxito."));
     }

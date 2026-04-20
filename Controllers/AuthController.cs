@@ -42,6 +42,17 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// Cambiar la contraseña de un usuario.
+    /// </summary>
+    [HttpPut("cambiar-password")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> CambiarPassword([FromBody] ChangePasswordRequest request)
+    {
+        await _authService.ChangePasswordAsync(request);
+        return Ok(ApiResponse<object>.Success(null, "Contraseña actualizada exitosamente"));
+    }
+
+    /// <summary>
     /// Utilidad temporal para generar un hash BCrypt para una contraseña (para crear usuarios en BD o debugear).
     /// </summary>
     [HttpGet("hash/{password}")]

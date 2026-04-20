@@ -49,5 +49,13 @@ CREATE TABLE reporte_cartera_historico (
     saldo_cartera DECIMAL(18,2),
     capital_vencido DECIMAL(18,2),
     saldo_final DECIMAL(18,2),
-    porcentaje_calidad DECIMAL(5,2)
+    porcentaje_calidad DECIMAL(5,2),
+    tipo INT
 );
+
+
+CREATE EVENT e_reporte_mensual_limpio
+    ON SCHEDULE EVERY 1 MONTH
+        STARTS LAST_DAY(CURDATE()) + INTERVAL 23 HOUR + INTERVAL 59 MINUTE
+    DO
+    CALL sp_job_generar_historico_limpio();

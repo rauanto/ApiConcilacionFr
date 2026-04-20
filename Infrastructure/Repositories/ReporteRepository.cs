@@ -68,11 +68,11 @@ public class ReporteRepository : IReporteRepository
 
 
     #region Historico Cartera
-    public async Task<IEnumerable<ReporteCarteraEjecutivoHistorico>> GetCarteraEjecutivoHistoricoAsync(int mes, int anio, int usuarioId, string rol)
+    public async Task<IEnumerable<ReporteCarteraEjecutivoHistorico>> GetCarteraEjecutivoHistoricoAsync(int mes, int anio, int usuarioId, string rol,int tipoReporte)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = "CALL sp_consultar_historico_cartera(@p_mes, @p_anio, @p_usuario_id, @p_rol);";
-        return await connection.QueryAsync<ReporteCarteraEjecutivoHistorico>(sql, new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol });
+        var sql = "CALL sp_consultar_historico_cartera(@p_mes, @p_anio, @p_usuario_id, @p_rol,@tipo_reporte);";
+        return await connection.QueryAsync<ReporteCarteraEjecutivoHistorico>(sql, new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
     }
     #endregion
 

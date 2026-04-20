@@ -74,6 +74,23 @@ public class AuthService : IAuthService
         return new AuthResponse(token, profile);
     }
 
+    public async Task<bool> ChangePasswordAsync(ChangePasswordRequest request)
+    {
+        if (!int.TryParse(request.UserId, out int parsedUserId))
+        {
+            throw new ArgumentException("UserId inválido.");
+        }
+
+        var usuario = await _usuarioRepository.GetByIdAsync(parsedUserId);
+        if (usuario == null)
+        {
+            throw new NotFoundException("Usuario no encontrado.");
+        }
+
+        usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        return await _usuarioRepository.UpdateAsync(usuario);
+    }
+
     public async Task<UsuarioProfile> GetProfileAsync(int userId)
     {
         var usuario = await _usuarioRepository.GetByIdAsync(userId);
