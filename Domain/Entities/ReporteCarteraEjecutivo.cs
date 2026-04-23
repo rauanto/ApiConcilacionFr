@@ -11,4 +11,5 @@ public class ReporteCarteraEjecutivo
     public double? capital_vencido { get; set; }
     public double? saldo_final { get; set; }
     public double? porcentaje_calidad { get; set; }
+    public int? id_usuario { get; set; }
 }

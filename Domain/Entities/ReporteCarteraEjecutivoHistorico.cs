@@ -15,4 +15,6 @@ public class ReporteCarteraEjecutivoHistorico
     public int Id { get; set; }
     public DateTime fecha_corte { get; set; }
     public DateTime fecha_registro { get; set; }
+
+    public int? id_usuario { get; set; }
 }

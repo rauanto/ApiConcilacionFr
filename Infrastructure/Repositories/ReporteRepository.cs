@@ -25,9 +25,8 @@ public class ReporteRepository : IReporteRepository
         // sino que debes llamarlo incluyendo el nombre del Schema como "fincrece.sp_...", se debe de poner directo
         // En este caso llamamos mediante el método habitual.
         var parametros = new DynamicParameters();
-        parametros.Add("grupos_param", grupos); // Deberá pasarse con el nombre correcto de parámetro definido en tu sp, aquí uso raw query por ser más seguro si no sabemos el nombre.
-
-        // Haciendo un Call crudo directo como lo mandaste en el ejemplo:
+        parametros.Add("grupos_param", grupos);
+        
         var sql = "CALL sp_ReporteCarteraPorGrupo(@Grupos);";
         
         return await connection.QueryAsync<ReporteCartera>(sql, new { Grupos = grupos });
@@ -74,7 +73,17 @@ public class ReporteRepository : IReporteRepository
         var sql = "CALL sp_consultar_historico_cartera(@p_mes, @p_anio, @p_usuario_id, @p_rol,@tipo_reporte);";
         return await connection.QueryAsync<ReporteCarteraEjecutivoHistorico>(sql, new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
     }
+
+    public async Task<IEnumerable<ReporteCarteraHisotoricoGrupo>> GetCarteraEjecutivoHistoricoGrupoAsync(int mes, int anio, int usuarioId, string rol, int tipoReporte)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        var sql = "CALL sp_consultar_historico_cartera_grupo(@p_mes, @p_anio, @p_usuario_id, @p_rol ,@tipo_reporte);";
+        return await connection.QueryAsync<ReporteCarteraHisotoricoGrupo>(sql, new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
+    }
+
     #endregion
+
+    
 
     #region Otorgados por grupo y nombre
     public async Task<IEnumerable<ReporteOtorgadosGrupo>> GetOtorgadosGrupoAsync(DateTime fechaInicio, string rol, int usuarioId)

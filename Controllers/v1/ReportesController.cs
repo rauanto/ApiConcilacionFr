@@ -188,4 +188,35 @@ public class ReportesController : ControllerBase
     }
 
     #endregion
+
+    #region historico cartera grupo
+    [HttpGet("carteraEjecutivoHistoricoGrupo")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteCarteraHisotoricoGrupo>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCarteraEjecutivoHistoricoGrupo([FromQuery] int mes, [FromQuery] int anio, [FromQuery] int tipo_reporte)
+    {
+        var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+                           ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+        {
+            return Unauthorized(ApiResponse<object>.Failure("Token inválido o mal formado."));
+        }
+
+        if (mes == 0)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un mes válido."));
+        }
+
+        if (anio == 0)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar una fecha de fin válida."));
+        }
+
+        var resultado = await _reporteRepo.GetCarteraEjecutivoHistoricoGrupoAsync(mes,  anio  , userId, rolName, tipo_reporte);
+
+        return Ok(ApiResponse<IEnumerable<ReporteCarteraHisotoricoGrupo>>.Success(resultado, "Reporte de cartera de ejecutivos histórico por grupo obtenido con éxito."));
+    }
+
+    #endregion
 }
