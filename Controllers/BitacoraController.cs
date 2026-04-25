@@ -93,6 +93,38 @@ public class BitacoraController : ControllerBase
         return Ok(ApiResponse<bool>.Success(result, "Bitácora eliminada exitosamente."));
     }
 
+    /// <summary>
+    /// Sube o reemplaza el archivo de grabación de una bitácora.
+    /// Formatos aceptados: mp3, wav, mp4, ogg, m4a, webm, avi, mov, aac.
+    /// </summary>
+    [HttpPost("{id:int}/grabacion")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(104_857_600)] // 100 MB
+    [ProducesResponseType(typeof(ApiResponse<BitacoraResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SubirGrabacion(int id, IFormFile archivo)
+    {
+        var updated = await _service.SubirGrabacionAsync(id, archivo);
+        return Ok(ApiResponse<BitacoraResponse>.Success(updated, "Grabación subida exitosamente."));
+    }
+
+    /// <summary>
+    /// Sube o reemplaza el archivo de evidencia de una bitácora.
+    /// Formatos aceptados: jpg, jpeg, png, gif, webp, pdf.
+    /// </summary>
+    [HttpPost("{id:int}/evidencia")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(20_971_520)] // 20 MB
+    [ProducesResponseType(typeof(ApiResponse<BitacoraResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SubirEvidencia(int id, IFormFile archivo)
+    {
+        var updated = await _service.SubirEvidenciaAsync(id, archivo);
+        return Ok(ApiResponse<BitacoraResponse>.Success(updated, "Evidencia subida exitosamente."));
+    }
+
     private bool TryGetGestorId(out int gestorId)
     {
         var value = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value

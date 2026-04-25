@@ -2,6 +2,7 @@ using ApiConcilacionFr.Common;
 using ApiConcilacionFr.Core.Interfaces;
 using ApiConcilacionFr.Domain.Entities;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 
 namespace ApiConcilacionFr.Core.Services;
 
@@ -10,15 +11,18 @@ public class BitacoraService : IBitacoraService
     private readonly IBitacoraRepository _repo;
     private readonly IValidator<CreateBitacoraRequest> _createValidator;
     private readonly IValidator<UpdateBitacoraRequest> _updateValidator;
+    private readonly IFileStorageService _fileStorage;
 
     public BitacoraService(
         IBitacoraRepository repo,
         IValidator<CreateBitacoraRequest> createValidator,
-        IValidator<UpdateBitacoraRequest> updateValidator)
+        IValidator<UpdateBitacoraRequest> updateValidator,
+        IFileStorageService fileStorage)
     {
         _repo = repo;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
+        _fileStorage = fileStorage;
     }
 
     public async Task<PagedResponse<BitacoraResponse>> GetAllAsync(BitacoraFiltros filtros, PaginationParams paginacion)
@@ -119,6 +123,30 @@ public class BitacoraService : IBitacoraService
             ?? throw new NotFoundException($"Bitácora con id {id} no encontrada.");
 
         return await _repo.DeleteAsync(id);
+    }
+
+    public async Task<BitacoraResponse> SubirGrabacionAsync(int id, IFormFile archivo)
+    {
+        var existing = await _repo.GetByIdAsync(id)
+            ?? throw new NotFoundException($"Bitácora con id {id} no encontrada.");
+
+        _fileStorage.EliminarArchivo(existing.UrlGrabacion);
+
+        var urlNueva = await _fileStorage.GuardarGrabacionAsync(archivo, id);
+        var updated = await _repo.UpdateUrlGrabacionAsync(id, urlNueva);
+        return ToResponse(updated);
+    }
+
+    public async Task<BitacoraResponse> SubirEvidenciaAsync(int id, IFormFile archivo)
+    {
+        var existing = await _repo.GetByIdAsync(id)
+            ?? throw new NotFoundException($"Bitácora con id {id} no encontrada.");
+
+        _fileStorage.EliminarArchivo(existing.UrlEvidencia);
+
+        var urlNueva = await _fileStorage.GuardarEvidenciaAsync(archivo, id);
+        var updated = await _repo.UpdateUrlEvidenciaAsync(id, urlNueva);
+        return ToResponse(updated);
     }
 
     private static BitacoraResponse ToResponse(Bitacora b) => new(

@@ -71,9 +71,9 @@ public class BitacoraRepository : IBitacoraRepository
             Offset = (paginacion.Page - 1) * paginacion.PageSize
         };
 
-        var countSql = $"SELECT COUNT(*) FROM bitacora_gestion {WhereFilters}";
+        var countSql = $"SELECT COUNT(*) FROM bitacora.bitacora_gestion {WhereFilters}";
         var dataSql = $@"SELECT {SelectColumns}
-                         FROM bitacora_gestion {WhereFilters}
+                         FROM bitacora.bitacora_gestion {WhereFilters}
                          ORDER BY created_at DESC
                          LIMIT @PageSize OFFSET @Offset";
 
@@ -86,7 +86,7 @@ public class BitacoraRepository : IBitacoraRepository
     public async Task<Bitacora?> GetByIdAsync(int id)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = $"SELECT {SelectColumns} FROM bitacora_gestion WHERE id = @Id";
+        var sql = $"SELECT {SelectColumns} FROM bitacora.bitacora_gestion WHERE id = @Id";
         return await connection.QuerySingleOrDefaultAsync<Bitacora>(sql, new { Id = id });
     }
 
@@ -94,7 +94,7 @@ public class BitacoraRepository : IBitacoraRepository
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
         const string sql = @"
-            INSERT INTO bitacora_gestion (
+            INSERT INTO bitacora.bitacora_gestion (
                 amortizacion_id, credito_id, cliente_id, gestor_id, medio_contacto_id,
                 fecha_hora_gestion, tipo_gestion, sentido, resultado, duracion_segundos,
                 mensaje_enviado, asunto, respuesta_cliente, promesa_fecha_pago, promesa_monto,
@@ -165,8 +165,26 @@ public class BitacoraRepository : IBitacoraRepository
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
         var rows = await connection.ExecuteAsync(
-            "DELETE FROM bitacora_gestion WHERE id = @Id",
+            "DELETE FROM bitacora.bitacora_gestion WHERE id = @Id",
             new { Id = id });
         return rows > 0;
+    }
+
+    public async Task<Bitacora> UpdateUrlGrabacionAsync(int id, string url)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        await connection.ExecuteAsync(
+            "UPDATE bitacora.bitacora_gestion SET url_grabacion = @Url WHERE id = @Id",
+            new { Url = url, Id = id });
+        return (await GetByIdAsync(id))!;
+    }
+
+    public async Task<Bitacora> UpdateUrlEvidenciaAsync(int id, string url)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        await connection.ExecuteAsync(
+            "UPDATE bitacora.bitacora_gestion SET url_evidencia = @Url WHERE id = @Id",
+            new { Url = url, Id = id });
+        return (await GetByIdAsync(id))!;
     }
 }

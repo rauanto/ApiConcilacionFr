@@ -1,5 +1,6 @@
 using ApiConcilacionFr.Common;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 
 namespace ApiConcilacionFr.Core.Interfaces;
 
@@ -180,4 +181,6 @@ public interface IBitacoraService
     Task<BitacoraResponse> CreateAsync(CreateBitacoraRequest request, int gestorId);
     Task<BitacoraResponse> UpdateAsync(int id, UpdateBitacoraRequest request, int gestorId);
     Task<bool> DeleteAsync(int id);
+    Task<BitacoraResponse> SubirGrabacionAsync(int id, IFormFile archivo);
+    Task<BitacoraResponse> SubirEvidenciaAsync(int id, IFormFile archivo);
 }

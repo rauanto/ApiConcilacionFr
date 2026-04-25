@@ -7,6 +7,7 @@ using ApiConcilacionFr.Core.Interfaces;
 using ApiConcilacionFr.Core.Services;
 using ApiConcilacionFr.Infrastructure.Auth;
 using ApiConcilacionFr.Infrastructure.Repositories;
+using ApiConcilacionFr.Infrastructure.Services;
 using Audit.Core;
 using Audit.MySql;
 using Audit.WebApi;
@@ -75,6 +76,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     // builder.Services.AddScoped<IProductoService, ProductoService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<IBitacoraService, BitacoraService>();
+    builder.Services.AddSingleton<IFileStorageService, LocalFileStorageService>();
 
     // FluentValidation — auto-registro de todos los validators del ensamblado
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -103,6 +105,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
 
     app.UseHttpsRedirection();
     app.UseCors("AllowAll");
+    app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseAuthentication();
     app.UseAuthorization();
