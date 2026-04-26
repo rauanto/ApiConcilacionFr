@@ -28,7 +28,8 @@ public record CreateBitacoraRequest(
     long? GrupoId,
     string? DiasVencidos,
     string? CarteraVencidaContable,
-    string? Demanda
+    string? Demanda,
+    string? Estatus
 );
 
 public record UpdateBitacoraRequest(
@@ -56,7 +57,8 @@ public record UpdateBitacoraRequest(
     long? GrupoId,
     string? DiasVencidos,
     string? CarteraVencidaContable,
-    string? Demanda
+    string? Demanda,
+    string? Estatus
 );
 
 public record BitacoraResponse(
@@ -87,7 +89,8 @@ public record BitacoraResponse(
     long? GrupoId,
     string? DiasVencidos,
     string? CarteraVencidaContable,
-    string? Demanda
+    string? Demanda,
+    string? Estatus
 );
 
 public class CreateBitacoraValidator : AbstractValidator<CreateBitacoraRequest>
@@ -129,6 +132,7 @@ public class CreateBitacoraValidator : AbstractValidator<CreateBitacoraRequest>
         RuleFor(x => x.Asunto).MaximumLength(255).When(x => x.Asunto != null);
         RuleFor(x => x.UrlGrabacion).MaximumLength(500).When(x => x.UrlGrabacion != null);
         RuleFor(x => x.UrlEvidencia).MaximumLength(500).When(x => x.UrlEvidencia != null);
+        RuleFor(x => x.Estatus).MaximumLength(30).When(x => x.Estatus != null);
     }
 }
 
@@ -171,6 +175,7 @@ public class UpdateBitacoraValidator : AbstractValidator<UpdateBitacoraRequest>
         RuleFor(x => x.Asunto).MaximumLength(255).When(x => x.Asunto != null);
         RuleFor(x => x.UrlGrabacion).MaximumLength(500).When(x => x.UrlGrabacion != null);
         RuleFor(x => x.UrlEvidencia).MaximumLength(500).When(x => x.UrlEvidencia != null);
+        RuleFor(x => x.Estatus).MaximumLength(30).When(x => x.Estatus != null);
     }
 }
 

@@ -70,6 +70,7 @@ public class BitacoraService : IBitacoraService
             DiasVencidos = request.DiasVencidos,
             CarteraVencidaContable = request.CarteraVencidaContable,
             Demanda = request.Demanda,
+            Estatus = request.Estatus,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -112,6 +113,7 @@ public class BitacoraService : IBitacoraService
         existing.DiasVencidos = request.DiasVencidos;
         existing.CarteraVencidaContable = request.CarteraVencidaContable;
         existing.Demanda = request.Demanda;
+        existing.Estatus = request.Estatus;
 
         var updated = await _repo.UpdateAsync(existing);
         return ToResponse(updated);
@@ -177,6 +179,7 @@ public class BitacoraService : IBitacoraService
         b.GrupoId,
         b.DiasVencidos,
         b.CarteraVencidaContable,
-        b.Demanda
+        b.Demanda,
+        b.Estatus
     );
 }

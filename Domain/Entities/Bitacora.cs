@@ -30,4 +30,5 @@ public class Bitacora
     public string? DiasVencidos { get; set; }
     public string? CarteraVencidaContable { get; set; }
     public string? Demanda { get; set; }
+    public string? Estatus { get; set; }
 }

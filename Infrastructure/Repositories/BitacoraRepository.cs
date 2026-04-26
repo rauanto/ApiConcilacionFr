@@ -46,7 +46,8 @@ public class BitacoraRepository : IBitacoraRepository
         grupo_id                    AS GrupoId,
         dias_vencidos               AS DiasVencidos,
         cartera_vencida_contable    AS CarteraVencidaContable,
-        demanda                     AS Demanda";
+        demanda                     AS Demanda,
+        estatus                     AS Estatus";
 
     private const string WhereFilters = @"
         WHERE (@CreditoId IS NULL OR credito_id = @CreditoId)
@@ -99,13 +100,13 @@ public class BitacoraRepository : IBitacoraRepository
                 fecha_hora_gestion, tipo_gestion, sentido, resultado, duracion_segundos,
                 mensaje_enviado, asunto, respuesta_cliente, promesa_fecha_pago, promesa_monto,
                 url_grabacion, url_evidencia, observaciones, geolocalizacion_lat, geolocalizacion_lng,
-                fecha_cobro, grupo_id, dias_vencidos, cartera_vencida_contable, demanda
+                fecha_cobro, grupo_id, dias_vencidos, cartera_vencida_contable, demanda, estatus
             ) VALUES (
                 @AmortizacionId, @CreditoId, @ClienteId, @GestorId, @MedioContactoId,
                 @FechaHoraGestion, @TipoGestion, @Sentido, @Resultado, @DuracionSegundos,
                 @MensajeEnviado, @Asunto, @RespuestaCliente, @PromesaFechaPago, @PromesaMonto,
                 @UrlGrabacion, @UrlEvidencia, @Observaciones, @GeolocalizacionLat, @GeolocalizacionLng,
-                @FechaCobro, @GrupoId, @DiasVencidos, @CarteraVencidaContable, @Demanda
+                @FechaCobro, @GrupoId, @DiasVencidos, @CarteraVencidaContable, @Demanda, @Estatus
             );
             SELECT LAST_INSERT_ID();";
 
@@ -153,7 +154,8 @@ public class BitacoraRepository : IBitacoraRepository
                         grupo_id                    = @GrupoId,
                         dias_vencidos               = @DiasVencidos,
                         cartera_vencida_contable    = @CarteraVencidaContable,
-                        demanda                     = @Demanda
+                        demanda                     = @Demanda,
+                        estatus                     = @Estatus
                     WHERE id = @Id";
                 await connection.ExecuteAsync(sql, bitacora);
             });

@@ -24,7 +24,8 @@ create table bitacora_gestion
     geolocalizacion_lat decimal(10, 8)                                                                                                                                                                                                                                           null,
     geolocalizacion_lng decimal(11, 8)                                                                                                                                                                                                                                           null,
     created_at          timestamp default CURRENT_TIMESTAMP                                                                                                                                                                                                                      not null,
-    fecha_cobro         date                                                                                                                                                                                                                                                     null
+    fecha_cobro         date                                                                                                                                                                                                                                                     null,
+    estatus             varchar(30)                                                                                                                                                                                                                                               null
 );
 
 create index idx_amortizacion
