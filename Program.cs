@@ -1,6 +1,7 @@
 using ApiConcilacionFr.Infrastructure.Database;
 
 using FluentValidation;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using ApiConcilacionFr.Common;
 using ApiConcilacionFr.Core.Interfaces;
@@ -105,7 +106,13 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
 
     app.UseHttpsRedirection();
     app.UseCors("AllowAll");
-    app.UseStaticFiles();
+    var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "uploads");
+    Directory.CreateDirectory(uploadsPath);
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(uploadsPath),
+        RequestPath = "/uploads"
+    });
     app.UseSerilogRequestLogging();
     app.UseAuthentication();
     app.UseAuthorization();

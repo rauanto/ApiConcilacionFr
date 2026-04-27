@@ -12,17 +12,20 @@ public class BitacoraService : IBitacoraService
     private readonly IValidator<CreateBitacoraRequest> _createValidator;
     private readonly IValidator<UpdateBitacoraRequest> _updateValidator;
     private readonly IFileStorageService _fileStorage;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public BitacoraService(
         IBitacoraRepository repo,
         IValidator<CreateBitacoraRequest> createValidator,
         IValidator<UpdateBitacoraRequest> updateValidator,
-        IFileStorageService fileStorage)
+        IFileStorageService fileStorage,
+        IHttpContextAccessor httpContextAccessor)
     {
         _repo = repo;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
         _fileStorage = fileStorage;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<PagedResponse<BitacoraResponse>> GetAllAsync(BitacoraFiltros filtros, PaginationParams paginacion)
@@ -58,14 +61,14 @@ public class BitacoraService : IBitacoraService
             MensajeEnviado = request.MensajeEnviado,
             Asunto = request.Asunto,
             RespuestaCliente = request.RespuestaCliente,
-            PromesaFechaPago = request.PromesaFechaPago,
+            PromesaFechaPago = request.PromesaFechaPago?.ToDateTime(TimeOnly.MinValue),
             PromesaMonto = request.PromesaMonto,
             UrlGrabacion = request.UrlGrabacion,
             UrlEvidencia = request.UrlEvidencia,
             Observaciones = request.Observaciones,
             GeolocalizacionLat = request.GeolocalizacionLat,
             GeolocalizacionLng = request.GeolocalizacionLng,
-            FechaCobro = request.FechaCobro,
+            FechaCobro = request.FechaCobro?.ToDateTime(TimeOnly.MinValue),
             GrupoId = request.GrupoId,
             DiasVencidos = request.DiasVencidos,
             CarteraVencidaContable = request.CarteraVencidaContable,
@@ -100,7 +103,7 @@ public class BitacoraService : IBitacoraService
         existing.MensajeEnviado = request.MensajeEnviado;
         existing.Asunto = request.Asunto;
         existing.RespuestaCliente = request.RespuestaCliente;
-        existing.PromesaFechaPago = request.PromesaFechaPago;
+        existing.PromesaFechaPago = request.PromesaFechaPago?.ToDateTime(TimeOnly.MinValue);
         existing.PromesaMonto = request.PromesaMonto;
         existing.PromesaCumplida = request.PromesaCumplida;
         existing.UrlGrabacion = request.UrlGrabacion;
@@ -108,7 +111,7 @@ public class BitacoraService : IBitacoraService
         existing.Observaciones = request.Observaciones;
         existing.GeolocalizacionLat = request.GeolocalizacionLat;
         existing.GeolocalizacionLng = request.GeolocalizacionLng;
-        existing.FechaCobro = request.FechaCobro;
+        existing.FechaCobro = request.FechaCobro?.ToDateTime(TimeOnly.MinValue);
         existing.GrupoId = request.GrupoId;
         existing.DiasVencidos = request.DiasVencidos;
         existing.CarteraVencidaContable = request.CarteraVencidaContable;
@@ -151,7 +154,7 @@ public class BitacoraService : IBitacoraService
         return ToResponse(updated);
     }
 
-    private static BitacoraResponse ToResponse(Bitacora b) => new(
+    private BitacoraResponse ToResponse(Bitacora b) => new(
         b.Id,
         b.AmortizacionId,
         b.CreditoId,
@@ -166,20 +169,28 @@ public class BitacoraService : IBitacoraService
         b.MensajeEnviado,
         b.Asunto,
         b.RespuestaCliente,
-        b.PromesaFechaPago,
+        b.PromesaFechaPago.HasValue ? DateOnly.FromDateTime(b.PromesaFechaPago.Value) : null,
         b.PromesaMonto,
         b.PromesaCumplida,
-        b.UrlGrabacion,
-        b.UrlEvidencia,
+        ToAbsoluteUrl(b.UrlGrabacion),
+        ToAbsoluteUrl(b.UrlEvidencia),
         b.Observaciones,
         b.GeolocalizacionLat,
         b.GeolocalizacionLng,
         b.CreatedAt,
-        b.FechaCobro,
+        b.FechaCobro.HasValue ? DateOnly.FromDateTime(b.FechaCobro.Value) : null,
         b.GrupoId,
         b.DiasVencidos,
         b.CarteraVencidaContable,
         b.Demanda,
         b.Estatus
     );
+
+    private string? ToAbsoluteUrl(string? rutaRelativa)
+    {
+        if (string.IsNullOrWhiteSpace(rutaRelativa)) return null;
+        var request = _httpContextAccessor.HttpContext?.Request;
+        if (request is null) return rutaRelativa;
+        return $"{request.Scheme}://{request.Host}{rutaRelativa}";
+    }
 }
