@@ -1,0 +1,28 @@
+type: http_request
+model: http_request
+id: rq_hdhmyQdP2N
+createdAt: 2026-04-07T17:08:26.721547100
+updatedAt: 2026-04-21T00:12:00.538850
+workspaceId: wk_x5DA42QsgK
+folderId: fl_L5D8XkRRFU
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "nombreUsuario": "ANAID ROMERO",
+      "correo": "contraloria@fincrece.com.mx",
+      "password": "anaid0123"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: aFhrS3B4xT
+method: POST
+name: register
+sortPriority: 2000.0
+url: ${[ url_produccion ]}/api/auth/register
+urlParameters: []

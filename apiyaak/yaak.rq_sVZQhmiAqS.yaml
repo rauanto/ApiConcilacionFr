@@ -1,0 +1,19 @@
+type: http_request
+model: http_request
+id: rq_sVZQhmiAqS
+createdAt: 2026-04-07T17:47:11.362510100
+updatedAt: 2026-04-10T22:46:33.884378100
+workspaceId: wk_x5DA42QsgK
+folderId: fl_L5D8XkRRFU
+authentication:
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0IiwidW5pcXVlX25hbWUiOiJuZWl2aSIsImVtYWlsIjoibmVpdmlAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXN1YXJpbyIsImp0aSI6IjFhZjBjZmNmLWFmNzMtNDE2Ni04MzBkLTI4MGE4MzllOGVjMyIsImV4cCI6MTc3NTU4NzcwNiwiaXNzIjoiQXBpQ29uY2kiLCJhdWQiOiJBcGlDb25jaUNsaWVudGVzIn0.aP7BEKTAbv45k630ZLIIu__njQSHnbsGA9U7aozu_i0
+authenticationType: bearer
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: perfil
+sortPriority: 1000.0
+url: ${[ url_pruebas ]}/api/Auth/perfil
+urlParameters: []

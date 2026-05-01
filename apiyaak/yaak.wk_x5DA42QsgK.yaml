@@ -1,0 +1,15 @@
+type: workspace
+model: workspace
+id: wk_x5DA42QsgK
+createdAt: 2026-04-07T16:50:43.589305600
+updatedAt: 2026-04-07T16:50:43.589308900
+authentication: {}
+authenticationType: null
+description: ''
+headers: []
+name: apivs
+encryptionKeyChallenge: null
+settingValidateCertificates: true
+settingFollowRedirects: true
+settingRequestTimeout: 0
+settingDnsOverrides: []

@@ -1,0 +1,23 @@
+type: http_request
+model: http_request
+id: rq_bGYjiHFYhQ
+createdAt: 2026-04-07T17:10:54.280505400
+updatedAt: 2026-04-10T22:46:33.841696300
+workspaceId: wk_x5DA42QsgK
+folderId: fl_L5D8XkRRFU
+authentication:
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwidW5pcXVlX25hbWUiOiJzdHJpbmciLCJlbWFpbCI6InN0cmluZyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzdWFyaW8iLCJqdGkiOiJkNjM1M2QzYi01ZTdmLTQ1M2UtYWIzYy1jM2UzOTU5MzllZDMiLCJleHAiOjE3NzU1ODUzNTQsImlzcyI6IkFwaUNvbmNpIiwiYXVkIjoiQXBpQ29uY2lDbGllbnRlcyJ9.bLfvoig8IOOUz-TtIJldvzKuNeOLyu3dveIFAGSsRpM
+authenticationType: bearer
+body: {}
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: 8YBxy7BZbA
+method: POST
+name: logout
+sortPriority: 0.0
+url: ${[ url_pruebas ]}/api/Auth/logout
+urlParameters: []

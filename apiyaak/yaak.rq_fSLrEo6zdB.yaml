@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_fSLrEo6zdB
+createdAt: 2026-04-13T22:59:18.860139600
+updatedAt: 2026-04-23T22:46:36.325479300
+workspaceId: wk_x5DA42QsgK
+folderId: fl_FA58aoftH8
+authentication:
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwidW5pcXVlX25hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJqdGkiOiJhMzU4YThlYi02YjY1LTQ4Y2UtOTQyYi1jOTMxYjU3Njk5NTMiLCJleHAiOjE3NzYzNjYzMDYsImlzcyI6IkFwaUNvbmNpIiwiYXVkIjoiQXBpQ29uY2lDbGllbnRlcyJ9.PvwEFEdJLDPxrUPaQJA4hutNls68HdIL-9kv6SiqxBs
+authenticationType: bearer
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: liquidados por grupo
+sortPriority: 0.0
+url: ${[ url_pruebas ]}/api/v1/Reportes/liquidadosGrupo
+urlParameters:
+- enabled: true
+  name: fechaInicio
+  value: 2026-02-28
+  id: hq69eCn9D3
+- enabled: true
+  name: ''
+  value: ''
+  id: hYx5NV9XAa

@@ -1,0 +1,23 @@
+type: http_request
+model: http_request
+id: rq_367UTJLBFw
+createdAt: 2026-04-10T00:10:20.784454800
+updatedAt: 2026-04-15T00:04:05.142900800
+workspaceId: wk_x5DA42QsgK
+folderId: fl_CrcDL2xvqY
+authentication:
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwidW5pcXVlX25hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJqdGkiOiI3MTk2NjNjOC0xNGRmLTQzMDctOGVmNS00MWIwOTc4YzQzNWIiLCJleHAiOjE3NzU3ODM0NjQsImlzcyI6IkFwaUNvbmNpIiwiYXVkIjoiQXBpQ29uY2lDbGllbnRlcyJ9.jvgojXDu7VvcwigKYhFaeF__s1alZxQHqotFACnAG7I
+authenticationType: bearer
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: amortizaciones por prestamo
+sortPriority: 0.0
+url: ${[ url_pruebas ]}/api/Reportes/amortizacion/1250010
+urlParameters:
+- enabled: true
+  name: ''
+  value: ''
+  id: XYzHnkp3It

@@ -1,0 +1,31 @@
+type: http_request
+model: http_request
+id: rq_hoEU4Ru3Ft
+createdAt: 2026-04-16T19:59:35.448360200
+updatedAt: 2026-04-16T21:30:46.512207500
+workspaceId: wk_x5DA42QsgK
+folderId: fl_sk9vX3zxKA
+authentication:
+  token: ${[ token ]}
+authenticationType: bearer
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: url_pruebas/api/v1/Reportes/otorgadosAcreditados
+sortPriority: 0.0
+url: ${[ url_produccion ]}/api/v1/Reportes/otorgadosAcreditados
+urlParameters:
+- enabled: true
+  name: fechaInicio
+  value: 2026-02-28
+  id: saZh33XSk7
+- enabled: true
+  name: grupo
+  value: '990034'
+  id: iBYSUK37zk
+- enabled: true
+  name: ''
+  value: ''
+  id: bS54ftp2CX

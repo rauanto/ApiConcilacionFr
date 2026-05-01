@@ -20,7 +20,9 @@ public class LocalFileStorageService : IFileStorageService
     {
         var seccion = configuration.GetSection("FileStorage");
         var carpeta = seccion["RutaBase"] ?? "uploads";
-        _rutaBase = Path.Combine(env.WebRootPath ?? env.ContentRootPath, carpeta);
+        _rutaBase = Path.IsPathRooted(carpeta)
+            ? carpeta
+            : Path.Combine(env.ContentRootPath, carpeta);
 
         var mbGrabacion = seccion.GetValue<int>("TamanoMaxGrabacionMb", 100);
         var mbEvidencia = seccion.GetValue<int>("TamanoMaxEvidenciaMb", 20);

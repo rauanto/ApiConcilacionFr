@@ -1,0 +1,23 @@
+type: http_request
+model: http_request
+id: rq_D4nxe5q3mj
+createdAt: 2026-04-07T21:25:04.884631300
+updatedAt: 2026-04-11T15:26:05.340989300
+workspaceId: wk_x5DA42QsgK
+folderId: fl_PRKxuQXbrS
+authentication:
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwidW5pcXVlX25hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJqdGkiOiJhNjY5NDc4MS1jYzRmLTQ3YTgtYWY4Zi05ODVmMDkzN2Y0ZGQiLCJleHAiOjE3NzU5MjQxNDEsImlzcyI6IkFwaUNvbmNpIiwiYXVkIjoiQXBpQ29uY2lDbGllbnRlcyJ9.1UCD54CJsRDmh0CZU6HX8jyGTXKWQ3bD5z0K3tyqO4A
+authenticationType: bearer
+body: {}
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: wVcKsaMaGU
+method: GET
+name: url_pruebas/api/GrupoAsignado
+sortPriority: 0.0
+url: ${[ url_pruebas ]}/api/GrupoAsignado
+urlParameters: []

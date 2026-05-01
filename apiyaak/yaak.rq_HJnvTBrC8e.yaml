@@ -1,0 +1,35 @@
+type: http_request
+model: http_request
+id: rq_HJnvTBrC8e
+createdAt: 2026-04-07T16:50:46.069780
+updatedAt: 2026-04-22T20:56:12.433003300
+workspaceId: wk_x5DA42QsgK
+folderId: fl_L5D8XkRRFU
+authentication: {}
+authenticationType: none
+body:
+  text: |-
+    {
+        "usernameOrEmail": "admin",
+      "password": "admin0123"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: KkZQ8jdrQe
+- enabled: true
+  name: ''
+  value: ''
+  id: QTkHgkvTnK
+- enabled: true
+  name: ''
+  value: ''
+  id: 44ejf0fEsU
+method: POST
+name: login
+sortPriority: 3000.0
+url: ${[ url_produccion ]}/api/auth/login
+urlParameters: []

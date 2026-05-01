@@ -1,0 +1,43 @@
+type: http_request
+model: http_request
+id: rq_YBchiBhPk7
+createdAt: 2026-04-09T15:53:41.236742900
+updatedAt: 2026-04-23T22:46:11.183603400
+workspaceId: wk_x5DA42QsgK
+folderId: fl_CrcDL2xvqY
+authentication:
+  token: ${[ token ]}
+authenticationType: bearer
+body: {}
+bodyType: null
+description: ''
+headers:
+- enabled: true
+  name: miapp
+  value: asdadasdsa
+  id: Wkr0kh7dBM
+- enabled: true
+  name: ''
+  value: ''
+  id: DwIX9Aa93z
+method: GET
+name: dashboard general
+sortPriority: 0.0
+url: ${[ url_pruebas ]}/api/v1/Reportes/carteraEjecutivos
+urlParameters:
+- enabled: true
+  name: mes
+  value: '4'
+  id: Cm6WrvXzJ7
+- enabled: true
+  name: anio
+  value: '2026'
+  id: HFjVaqaUBc
+- enabled: true
+  name: tipo_reporte
+  value: '1'
+  id: ExR6jYZWKZ
+- enabled: true
+  name: ''
+  value: ''
+  id: 3ETbruFQdW

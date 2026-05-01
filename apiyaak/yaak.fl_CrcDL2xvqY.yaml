@@ -1,0 +1,14 @@
+type: folder
+model: folder
+id: fl_CrcDL2xvqY
+createdAt: 2026-04-09T15:15:52.904562200
+updatedAt: 2026-04-16T19:48:30.095432900
+workspaceId: wk_x5DA42QsgK
+folderId: null
+authentication:
+  token: ${[ token ]}
+authenticationType: bearer
+description: ''
+headers: []
+name: Reporte
+sortPriority: 1000.0

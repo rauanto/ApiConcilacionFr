@@ -106,7 +106,10 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
 
     app.UseHttpsRedirection();
     app.UseCors("AllowAll");
-    var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "uploads");
+    var carpetaStorage = builder.Configuration.GetSection("FileStorage")["RutaBase"] ?? "uploads";
+    var uploadsPath = Path.IsPathRooted(carpetaStorage)
+        ? carpetaStorage
+        : Path.Combine(builder.Environment.ContentRootPath, carpetaStorage);
     Directory.CreateDirectory(uploadsPath);
     app.UseStaticFiles(new StaticFileOptions
     {

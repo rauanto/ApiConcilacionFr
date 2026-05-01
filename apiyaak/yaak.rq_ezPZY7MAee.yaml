@@ -1,0 +1,32 @@
+type: http_request
+model: http_request
+id: rq_ezPZY7MAee
+createdAt: 2026-04-07T22:11:24.040920900
+updatedAt: 2026-04-23T22:46:08.813604500
+workspaceId: wk_x5DA42QsgK
+folderId: fl_CrcDL2xvqY
+authentication:
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwidW5pcXVlX25hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJqdGkiOiJhOTE5MjhhMS0wZGE0LTQwNmMtYTFhMC0yYmVkODJmYTc5NDgiLCJleHAiOjE3NzYxMDYzNjIsImlzcyI6IkFwaUNvbmNpIiwiYXVkIjoiQXBpQ29uY2lDbGllbnRlcyJ9.MrVxIx9O6bGDAaXQlPcRMZer1PWidyJs8JiqbuAFf4c
+authenticationType: bearer
+body:
+  text: ''
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: qCEUVdyXD6
+method: GET
+name: CarteraPorGrupo
+sortPriority: 0.0
+url: ${[ url_pruebas ]}/api/Reportes/CarteraPorGrupo
+urlParameters:
+- enabled: true
+  name: grupos
+  value: '990036'
+  id: m82dNyqD7y
+- enabled: true
+  name: ''
+  value: ''
+  id: nExKCfBW7k
