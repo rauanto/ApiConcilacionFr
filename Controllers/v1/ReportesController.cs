@@ -79,7 +79,7 @@ public class ReportesController : ControllerBase
     /// </summary>
     [HttpGet("liquidadosGrupo")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteLiquidadosgrupo>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetLiquidadosGrupo([FromQuery] DateTime fechaInicio)
+    public async Task<IActionResult> GetLiquidadosGrupo([FromQuery] DateTime fechaInicio, [FromQuery] DateTime? fechaFin)
     {
 
         var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
@@ -97,14 +97,14 @@ public class ReportesController : ControllerBase
         }
 
 
-        var resultado = await _reporteRepo.GetLiquidadosGrupoAsync(fechaInicio, rolName, userId);
+        var resultado = await _reporteRepo.GetLiquidadosGrupoAsync(fechaInicio, fechaFin, rolName, userId);
 
         return Ok(ApiResponse<IEnumerable<ReporteLiquidadosgrupo>>.Success(resultado, "Reporte de liquidados por grupo obtenido con éxito."));
     }
 
     [HttpGet("liquidadosAcreditados")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteLiquidadosAcreditados>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetLiquidadosAcreditados([FromQuery] DateTime fechaInicio, [FromQuery] int grupo)
+    public async Task<IActionResult> GetLiquidadosAcreditados([FromQuery] DateTime fechaInicio, [FromQuery] DateTime? fechaFin, [FromQuery] int grupo)
     {
         var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
         var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
@@ -125,7 +125,7 @@ public class ReportesController : ControllerBase
             return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un grupo válido."));
         }
 
-        var resultado = await _reporteRepo.GetLiquidadosAcreditadosAsync(fechaInicio, rolName, userId, grupo);
+        var resultado = await _reporteRepo.GetLiquidadosAcreditadosAsync(fechaInicio, fechaFin, rolName, userId, grupo);
 
         return Ok(ApiResponse<IEnumerable<ReporteLiquidadosAcreditados>>.Success(resultado, "Reporte de liquidados por grupo obtenido con éxito."));
     }
@@ -136,7 +136,7 @@ public class ReportesController : ControllerBase
     #region Otorgados por grupo y nombre
     [HttpGet("otorgadosGrupo")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteOtorgadosGrupo>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOtorgadosGrupo([FromQuery] DateTime fechaInicio)
+    public async Task<IActionResult> GetOtorgadosGrupo([FromQuery] DateTime fechaInicio, [FromQuery] DateTime? fechaFin)
     {
 
         var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
@@ -154,7 +154,7 @@ public class ReportesController : ControllerBase
         }
 
 
-        var resultado = await _reporteRepo.GetOtorgadosGrupoAsync(fechaInicio, rolName, userId);
+        var resultado = await _reporteRepo.GetOtorgadosGrupoAsync(fechaInicio, fechaFin, rolName, userId);
 
         return Ok(ApiResponse<IEnumerable<ReporteOtorgadosGrupo>>.Success(resultado, "Reporte de otorgados por grupo obtenido con éxito."));
     }

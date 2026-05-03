@@ -9,13 +9,13 @@ public interface IReporteRepository
     Task<IEnumerable<ReporteCarteraEjecutivo>> GetCarteraEjecutivosAsync(int usuarioId, string rol);
     Task<IEnumerable<Amortizacion>> ObtenerAmortizacionAsync(int pqClave);
 
-    Task<IEnumerable<ReporteLiquidadosgrupo>> GetLiquidadosGrupoAsync(DateTime fechaInicio, string rol, int usuarioId);
+    Task<IEnumerable<ReporteLiquidadosgrupo>> GetLiquidadosGrupoAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId);
 
-    Task<IEnumerable<ReporteLiquidadosAcreditados>> GetLiquidadosAcreditadosAsync(DateTime fechaInicio, string rol, int usuarioId, int grupo);
+    Task<IEnumerable<ReporteLiquidadosAcreditados>> GetLiquidadosAcreditadosAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId, int grupo);
 
     Task<IEnumerable<ReporteCarteraEjecutivoHistorico>> GetCarteraEjecutivoHistoricoAsync(int mes, int anio, int usuarioId, string rol,int tipoReporte);
 
-    Task<IEnumerable<ReporteOtorgadosGrupo>> GetOtorgadosGrupoAsync(DateTime fechaInicio, string rol, int usuarioId);
+    Task<IEnumerable<ReporteOtorgadosGrupo>> GetOtorgadosGrupoAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId);
 
     Task<IEnumerable<ReporteOtorgadosAcreditados>> GetOtorgadosAcreditadosAsync(DateTime fechaInicio, string rol, int usuarioId, int grupo);
 

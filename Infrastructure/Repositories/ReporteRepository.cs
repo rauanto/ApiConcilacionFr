@@ -47,18 +47,18 @@ public class ReporteRepository : IReporteRepository
     }
 
     #region Liquidados por grupo y nombre
-    public async Task<IEnumerable<ReporteLiquidadosgrupo>> GetLiquidadosGrupoAsync(DateTime fechaInicio, string rol, int usuarioId)
+    public async Task<IEnumerable<ReporteLiquidadosgrupo>> GetLiquidadosGrupoAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = "CALL sp_reporte_liquidados_grupo(@FechaInicio,@Rol,@UsuarioId);";
-        return await connection.QueryAsync<ReporteLiquidadosgrupo>(sql, new { FechaInicio = fechaInicio, Rol = rol, UsuarioId = usuarioId });
+        var sql = "CALL sp_reporte_liquidados_grupo(@FechaInicio,@FechaFin,@Rol,@UsuarioId);";
+        return await connection.QueryAsync<ReporteLiquidadosgrupo>(sql, new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId });
     }
 
-    public async Task<IEnumerable<ReporteLiquidadosAcreditados>> GetLiquidadosAcreditadosAsync(DateTime fechaInicio, string rol, int usuarioId, int grupo)
+    public async Task<IEnumerable<ReporteLiquidadosAcreditados>> GetLiquidadosAcreditadosAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId, int grupo)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = "CALL sp_reporte_liquidados_grupo_acreditados(@FechaInicio,@Rol,@UsuarioId,@Grupo);";
-        return await connection.QueryAsync<ReporteLiquidadosAcreditados>(sql, new { FechaInicio = fechaInicio, Rol = rol, UsuarioId = usuarioId, Grupo = grupo });
+        var sql = "CALL sp_reporte_liquidados_grupo_acreditados(@FechaInicio,@FechaFin,@Rol,@UsuarioId,@Grupo);";
+        return await connection.QueryAsync<ReporteLiquidadosAcreditados>(sql, new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId, Grupo = grupo });
     }
 
 
@@ -86,11 +86,11 @@ public class ReporteRepository : IReporteRepository
     
 
     #region Otorgados por grupo y nombre
-    public async Task<IEnumerable<ReporteOtorgadosGrupo>> GetOtorgadosGrupoAsync(DateTime fechaInicio, string rol, int usuarioId)
+    public async Task<IEnumerable<ReporteOtorgadosGrupo>> GetOtorgadosGrupoAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = "CALL sp_reporte_otorgados_grupo(@FechaInicio,@Rol,@UsuarioId);";
-        return await connection.QueryAsync<ReporteOtorgadosGrupo>(sql, new { FechaInicio = fechaInicio, Rol = rol, UsuarioId = usuarioId });
+        var sql = "CALL sp_reporte_otorgados_grupo(@FechaInicio,@FechaFin,@Rol,@UsuarioId);";
+        return await connection.QueryAsync<ReporteOtorgadosGrupo>(sql, new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId });
     }
 
     public async Task<IEnumerable<ReporteOtorgadosAcreditados>> GetOtorgadosAcreditadosAsync(DateTime fechaInicio, string rol, int usuarioId, int grupo)
