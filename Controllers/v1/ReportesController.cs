@@ -161,10 +161,10 @@ public class ReportesController : ControllerBase
 
     [HttpGet("otorgadosAcreditados")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteOtorgadosAcreditados>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOtorgadosAcreditados([FromQuery] DateTime fechaInicio, [FromQuery] int grupo)
+    public async Task<IActionResult> GetOtorgadosAcreditados([FromQuery] DateTime fechaInicio, [FromQuery] DateTime? fechaFin, [FromQuery] int grupo)
     {
         var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
-        var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+        var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
                            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
@@ -182,7 +182,7 @@ public class ReportesController : ControllerBase
             return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un grupo válido."));
         }
 
-        var resultado = await _reporteRepo.GetOtorgadosAcreditadosAsync(fechaInicio, rolName, userId, grupo);
+        var resultado = await _reporteRepo.GetOtorgadosAcreditadosAsync(fechaInicio, fechaFin, rolName, userId, grupo);
 
         return Ok(ApiResponse<IEnumerable<ReporteOtorgadosAcreditados>>.Success(resultado, "Reporte de otorgados por grupo obtenido con éxito."));
     }
@@ -217,6 +217,33 @@ public class ReportesController : ControllerBase
 
         return Ok(ApiResponse<IEnumerable<ReporteCarteraHisotoricoGrupo>>.Success(resultado, "Reporte de cartera de ejecutivos histórico por grupo obtenido con éxito."));
     }
+
+    #endregion
+
+
+    #region Historico detalle por grupo
+    [HttpGet("carteraEjecutivoHistoricoAcreditado")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteCarteraEjecutivoHistoricoAcreditados>>),StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCarteraEjecutivoHistoricoAcreditados([FromQuery] int mes,[FromQuery] int anio, [FromQuery] int S_GRUPO,[FromQuery] int tipo_reporte ){
+        if (mes == 0)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un mes válido."));
+        }
+
+        if (anio == 0)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar una fecha de fin válida."));
+        }
+
+
+        var resultado =
+            await _reporteRepo.GetCarteraEjecutivoHistoricoAcreditadosAsync(mes, anio, S_GRUPO, tipo_reporte);
+        
+        return Ok(ApiResponse<IEnumerable<ReporteCarteraEjecutivoHistoricoAcreditados>>.Success(resultado,"Reporte de Cartera historico por acreditados"));
+
+    }
+
+
 
     #endregion
 }

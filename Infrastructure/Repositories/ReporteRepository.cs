@@ -81,6 +81,14 @@ public class ReporteRepository : IReporteRepository
         return await connection.QueryAsync<ReporteCarteraHisotoricoGrupo>(sql, new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
     }
 
+    public async Task<IEnumerable<ReporteCarteraEjecutivoHistoricoAcreditados>> GetCarteraEjecutivoHistoricoAcreditadosAsync(int mes, int anio, int S_GRUPO, int tipoReporte){
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        var sql = "CALL autentificacion.sp_consultar_historico_cartera_grupo_acreditado(@p_mes, @p_anio,@tipo_reporte, @s_grup );";
+        return await connection.QueryAsync<ReporteCarteraEjecutivoHistoricoAcreditados>(sql, new { p_mes = mes, p_anio = anio,  tipo_reporte = tipoReporte, s_grup =S_GRUPO ,});
+    }
+
+
+
     #endregion
 
     
@@ -93,11 +101,11 @@ public class ReporteRepository : IReporteRepository
         return await connection.QueryAsync<ReporteOtorgadosGrupo>(sql, new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId });
     }
 
-    public async Task<IEnumerable<ReporteOtorgadosAcreditados>> GetOtorgadosAcreditadosAsync(DateTime fechaInicio, string rol, int usuarioId, int grupo)
+    public async Task<IEnumerable<ReporteOtorgadosAcreditados>> GetOtorgadosAcreditadosAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId, int grupo)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = "CALL sp_reporte_otorgados_grupo_acreditados(@FechaInicio,@Rol,@UsuarioId,@Grupo);";
-        return await connection.QueryAsync<ReporteOtorgadosAcreditados>(sql, new { FechaInicio = fechaInicio, Rol = rol, UsuarioId = usuarioId, Grupo = grupo });
+        var sql = "CALL sp_reporte_otorgados_grupo_acreditados(@FechaInicio,@FechaFin,@Rol,@UsuarioId,@Grupo);";
+        return await connection.QueryAsync<ReporteOtorgadosAcreditados>(sql, new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId, Grupo = grupo });
     }
 
     #endregion
