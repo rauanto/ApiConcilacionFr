@@ -71,68 +71,44 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetProfile()
     {
-        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                            ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
 
         if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
-        {
             return Unauthorized(ApiResponse<object>.Failure("Token inválido o mal formado."));
-        }
 
         var profile = await _authService.GetProfileAsync(userId);
         return Ok(ApiResponse<UsuarioProfile>.Success(profile, "Perfil recuperado."));
     }
 
     /// <summary>
-    /// Refrescar el token de sesión (Versión simplificada).
+    /// Refrescar el access token usando un refresh token válido. Implementa rotación de tokens.
     /// </summary>
     [HttpPost("refresh")]
-    [Authorize]
     [ProducesResponseType(typeof(ApiResponse<AuthResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> RefreshToken()
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
-        // En una implementación real se espera un RefreshToken.
-        // Aquí generamos un nuevo token para el usuario autenticado usando su perfil.
-        var userIdString = User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
-        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
-        {
-            return Unauthorized(ApiResponse<object>.Failure("Token inválido o mal formado."));
-        }
-
-        var profile = await _authService.GetProfileAsync(userId);
-
-        // Simulamos un login con el username provisto
-        // NOTA: Para producción usar un modelo de RefreshToken seguro.
-        var newToken = Infrastructure.Auth.JwtExtensions.GenerateToken(new Domain.Entities.Usuario 
-        {
-            Id = profile.Id,
-            NombreUsuario = profile.NombreUsuario,
-            Correo = profile.Correo,
-            Rol = profile.Rol
-        }, HttpContext.RequestServices.GetRequiredService<IConfiguration>());
-
-        return Ok(ApiResponse<AuthResponse>.Success(new AuthResponse(newToken, profile), "Token refrescado"));
+        var result = await _authService.RefreshTokenAsync(request);
+        return Ok(ApiResponse<AuthResponse>.Success(result, "Token refrescado exitosamente"));
     }
 
     /// <summary>
-    /// Cerrar sesión.
+    /// Cerrar sesión e invalidar el refresh token.
     /// </summary>
     [HttpPost("logout")]
-    [Authorize]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
     {
-        // Con JWT sin estado, el logout normal se hace en frontend borrando el token.
-        // Si hay modelo de Refresh Token, acá se invalidaría en DB.
-        return Ok(ApiResponse<object>.Success(null, "Cierre de sesión exitoso. Borre el token localmente."));
+        await _authService.LogoutAsync(request);
+        return Ok(ApiResponse<object>.Success(null, "Cierre de sesión exitoso."));
     }
 
     /// <summary>
     /// Listar usuarios (solo Id y Nombre)
     /// </summary>
     [HttpGet("usuarios")]
-    [Authorize] // or add a policy if needed
+    [Authorize]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<UsuarioBasic>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUsuarios()
     {

@@ -69,6 +69,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     // Repositorios
     // builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
     builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+    builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
     builder.Services.AddScoped<IGrupoAsignadoRepository, GrupoAsignadoRepository>();
     builder.Services.AddScoped<IReporteRepository, ReporteRepository>();
     builder.Services.AddScoped<IBitacoraRepository, BitacoraRepository>();
