@@ -18,6 +18,4 @@ public interface IBitacoraRepository
     Task<Bitacora> CreateAsync(Bitacora bitacora);
     Task<Bitacora> UpdateAsync(Bitacora bitacora);
     Task<bool> DeleteAsync(int id);
-    Task<Bitacora> UpdateUrlGrabacionAsync(int id, string url);
-    Task<Bitacora> UpdateUrlEvidenciaAsync(int id, string url);
 }

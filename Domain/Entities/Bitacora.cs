@@ -19,8 +19,6 @@ public class Bitacora
     public DateTime? PromesaFechaPago { get; set; }
     public decimal? PromesaMonto { get; set; }
     public bool? PromesaCumplida { get; set; }
-    public string? UrlGrabacion { get; set; }
-    public string? UrlEvidencia { get; set; }
     public string? Observaciones { get; set; }
     public decimal? GeolocalizacionLat { get; set; }
     public decimal? GeolocalizacionLng { get; set; }

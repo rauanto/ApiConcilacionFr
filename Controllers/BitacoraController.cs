@@ -34,7 +34,7 @@ public class BitacoraController : ControllerBase
     }
 
     /// <summary>
-    /// Obtiene un registro de bitácora por su ID.
+    /// Obtiene un registro de bitácora por su ID, incluyendo todos sus archivos adjuntos.
     /// </summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(ApiResponse<BitacoraResponse>), StatusCodes.Status200OK)]
@@ -82,7 +82,7 @@ public class BitacoraController : ControllerBase
     }
 
     /// <summary>
-    /// Elimina un registro de bitácora.
+    /// Elimina un registro de bitácora y todos sus archivos adjuntos.
     /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
@@ -94,7 +94,7 @@ public class BitacoraController : ControllerBase
     }
 
     /// <summary>
-    /// Sube o reemplaza el archivo de grabación de una bitácora.
+    /// Agrega una grabación a la bitácora. Se pueden adjuntar múltiples grabaciones.
     /// Formatos aceptados: mp3, wav, mp4, ogg, m4a, webm, avi, mov, aac.
     /// </summary>
     [HttpPost("{id:int}/grabacion")]
@@ -106,11 +106,11 @@ public class BitacoraController : ControllerBase
     public async Task<IActionResult> SubirGrabacion(int id, IFormFile archivo)
     {
         var updated = await _service.SubirGrabacionAsync(id, archivo);
-        return Ok(ApiResponse<BitacoraResponse>.Success(updated, "Grabación subida exitosamente."));
+        return Ok(ApiResponse<BitacoraResponse>.Success(updated, "Grabación agregada exitosamente."));
     }
 
     /// <summary>
-    /// Sube o reemplaza el archivo de evidencia de una bitácora.
+    /// Agrega una evidencia a la bitácora. Se pueden adjuntar múltiples evidencias.
     /// Formatos aceptados: jpg, jpeg, png, gif, webp, pdf.
     /// </summary>
     [HttpPost("{id:int}/evidencia")]
@@ -122,7 +122,20 @@ public class BitacoraController : ControllerBase
     public async Task<IActionResult> SubirEvidencia(int id, IFormFile archivo)
     {
         var updated = await _service.SubirEvidenciaAsync(id, archivo);
-        return Ok(ApiResponse<BitacoraResponse>.Success(updated, "Evidencia subida exitosamente."));
+        return Ok(ApiResponse<BitacoraResponse>.Success(updated, "Evidencia agregada exitosamente."));
+    }
+
+    /// <summary>
+    /// Elimina un archivo (grabación o evidencia) específico de la bitácora.
+    /// </summary>
+    [HttpDelete("{id:int}/archivos/{archivoId:int}")]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> EliminarArchivo(int id, int archivoId)
+    {
+        var result = await _service.EliminarArchivoAsync(id, archivoId);
+        return Ok(ApiResponse<bool>.Success(result, "Archivo eliminado exitosamente."));
     }
 
     private bool TryGetGestorId(out int gestorId)

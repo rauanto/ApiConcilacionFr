@@ -36,8 +36,6 @@ public class BitacoraRepository : IBitacoraRepository
         promesa_fecha_pago  AS PromesaFechaPago,
         promesa_monto       AS PromesaMonto,
         promesa_cumplida    AS PromesaCumplida,
-        url_grabacion       AS UrlGrabacion,
-        url_evidencia       AS UrlEvidencia,
         observaciones       AS Observaciones,
         geolocalizacion_lat AS GeolocalizacionLat,
         geolocalizacion_lng AS GeolocalizacionLng,
@@ -99,13 +97,13 @@ public class BitacoraRepository : IBitacoraRepository
                 amortizacion_id, credito_id, cliente_id, gestor_id, medio_contacto_id,
                 fecha_hora_gestion, tipo_gestion, sentido, resultado, duracion_segundos,
                 mensaje_enviado, asunto, respuesta_cliente, promesa_fecha_pago, promesa_monto,
-                url_grabacion, url_evidencia, observaciones, geolocalizacion_lat, geolocalizacion_lng,
+                observaciones, geolocalizacion_lat, geolocalizacion_lng,
                 fecha_cobro, grupo_id, dias_vencidos, cartera_vencida_contable, demanda, estatus
             ) VALUES (
                 @AmortizacionId, @CreditoId, @ClienteId, @GestorId, @MedioContactoId,
                 @FechaHoraGestion, @TipoGestion, @Sentido, @Resultado, @DuracionSegundos,
                 @MensajeEnviado, @Asunto, @RespuestaCliente, @PromesaFechaPago, @PromesaMonto,
-                @UrlGrabacion, @UrlEvidencia, @Observaciones, @GeolocalizacionLat, @GeolocalizacionLng,
+                @Observaciones, @GeolocalizacionLat, @GeolocalizacionLng,
                 @FechaCobro, @GrupoId, @DiasVencidos, @CarteraVencidaContable, @Demanda, @Estatus
             );
             SELECT LAST_INSERT_ID();";
@@ -145,9 +143,7 @@ public class BitacoraRepository : IBitacoraRepository
                         promesa_fecha_pago  = @PromesaFechaPago,
                         promesa_monto       = @PromesaMonto,
                         promesa_cumplida    = @PromesaCumplida,
-                        url_grabacion       = @UrlGrabacion,
-                        url_evidencia       = @UrlEvidencia,
-                        observaciones       = @Observaciones,
+                        observaciones               = @Observaciones,
                         geolocalizacion_lat         = @GeolocalizacionLat,
                         geolocalizacion_lng         = @GeolocalizacionLng,
                         fecha_cobro                 = @FechaCobro,
@@ -170,23 +166,5 @@ public class BitacoraRepository : IBitacoraRepository
             "DELETE FROM bitacora.bitacora_gestion WHERE id = @Id",
             new { Id = id });
         return rows > 0;
-    }
-
-    public async Task<Bitacora> UpdateUrlGrabacionAsync(int id, string url)
-    {
-        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        await connection.ExecuteAsync(
-            "UPDATE bitacora.bitacora_gestion SET url_grabacion = @Url WHERE id = @Id",
-            new { Url = url, Id = id });
-        return (await GetByIdAsync(id))!;
-    }
-
-    public async Task<Bitacora> UpdateUrlEvidenciaAsync(int id, string url)
-    {
-        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        await connection.ExecuteAsync(
-            "UPDATE bitacora.bitacora_gestion SET url_evidencia = @Url WHERE id = @Id",
-            new { Url = url, Id = id });
-        return (await GetByIdAsync(id))!;
     }
 }

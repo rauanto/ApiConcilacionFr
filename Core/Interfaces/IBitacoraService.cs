@@ -19,8 +19,6 @@ public record CreateBitacoraRequest(
     string? RespuestaCliente,
     DateOnly? PromesaFechaPago,
     decimal? PromesaMonto,
-    string? UrlGrabacion,
-    string? UrlEvidencia,
     string? Observaciones,
     decimal? GeolocalizacionLat,
     decimal? GeolocalizacionLng,
@@ -48,8 +46,6 @@ public record UpdateBitacoraRequest(
     DateOnly? PromesaFechaPago,
     decimal? PromesaMonto,
     bool? PromesaCumplida,
-    string? UrlGrabacion,
-    string? UrlEvidencia,
     string? Observaciones,
     decimal? GeolocalizacionLat,
     decimal? GeolocalizacionLng,
@@ -59,6 +55,15 @@ public record UpdateBitacoraRequest(
     string? CarteraVencidaContable,
     string? Demanda,
     string? Estatus
+);
+
+public record BitacoraArchivoResponse(
+    int Id,
+    int BitacoraId,
+    string Tipo,
+    string Url,
+    string NombreOriginal,
+    DateTime CreatedAt
 );
 
 public record BitacoraResponse(
@@ -79,8 +84,6 @@ public record BitacoraResponse(
     DateOnly? PromesaFechaPago,
     decimal? PromesaMonto,
     bool? PromesaCumplida,
-    string? UrlGrabacion,
-    string? UrlEvidencia,
     string? Observaciones,
     decimal? GeolocalizacionLat,
     decimal? GeolocalizacionLng,
@@ -90,7 +93,8 @@ public record BitacoraResponse(
     string? DiasVencidos,
     string? CarteraVencidaContable,
     string? Demanda,
-    string? Estatus
+    string? Estatus,
+    IReadOnlyList<BitacoraArchivoResponse> Archivos
 );
 
 public class CreateBitacoraValidator : AbstractValidator<CreateBitacoraRequest>
@@ -130,8 +134,6 @@ public class CreateBitacoraValidator : AbstractValidator<CreateBitacoraRequest>
             .GreaterThan(0).When(x => x.PromesaMonto.HasValue)
             .WithMessage("PromesaMonto debe ser mayor a 0.");
         RuleFor(x => x.Asunto).MaximumLength(255).When(x => x.Asunto != null);
-        RuleFor(x => x.UrlGrabacion).MaximumLength(500).When(x => x.UrlGrabacion != null);
-        RuleFor(x => x.UrlEvidencia).MaximumLength(500).When(x => x.UrlEvidencia != null);
         RuleFor(x => x.Estatus).MaximumLength(30).When(x => x.Estatus != null);
     }
 }
@@ -173,8 +175,6 @@ public class UpdateBitacoraValidator : AbstractValidator<UpdateBitacoraRequest>
             .GreaterThan(0).When(x => x.PromesaMonto.HasValue)
             .WithMessage("PromesaMonto debe ser mayor a 0.");
         RuleFor(x => x.Asunto).MaximumLength(255).When(x => x.Asunto != null);
-        RuleFor(x => x.UrlGrabacion).MaximumLength(500).When(x => x.UrlGrabacion != null);
-        RuleFor(x => x.UrlEvidencia).MaximumLength(500).When(x => x.UrlEvidencia != null);
         RuleFor(x => x.Estatus).MaximumLength(30).When(x => x.Estatus != null);
     }
 }
@@ -188,4 +188,5 @@ public interface IBitacoraService
     Task<bool> DeleteAsync(int id);
     Task<BitacoraResponse> SubirGrabacionAsync(int id, IFormFile archivo);
     Task<BitacoraResponse> SubirEvidenciaAsync(int id, IFormFile archivo);
+    Task<bool> EliminarArchivoAsync(int bitacoraId, int archivoId);
 }

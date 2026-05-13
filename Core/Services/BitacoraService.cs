@@ -9,6 +9,7 @@ namespace ApiConcilacionFr.Core.Services;
 public class BitacoraService : IBitacoraService
 {
     private readonly IBitacoraRepository _repo;
+    private readonly IBitacoraArchivoRepository _archivoRepo;
     private readonly IValidator<CreateBitacoraRequest> _createValidator;
     private readonly IValidator<UpdateBitacoraRequest> _updateValidator;
     private readonly IFileStorageService _fileStorage;
@@ -16,12 +17,14 @@ public class BitacoraService : IBitacoraService
 
     public BitacoraService(
         IBitacoraRepository repo,
+        IBitacoraArchivoRepository archivoRepo,
         IValidator<CreateBitacoraRequest> createValidator,
         IValidator<UpdateBitacoraRequest> updateValidator,
         IFileStorageService fileStorage,
         IHttpContextAccessor httpContextAccessor)
     {
         _repo = repo;
+        _archivoRepo = archivoRepo;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
         _fileStorage = fileStorage;
@@ -31,13 +34,27 @@ public class BitacoraService : IBitacoraService
     public async Task<PagedResponse<BitacoraResponse>> GetAllAsync(BitacoraFiltros filtros, PaginationParams paginacion)
     {
         var (items, total) = await _repo.GetAllAsync(filtros, paginacion);
-        return new PagedResponse<BitacoraResponse>(items.Select(ToResponse), total, paginacion);
+        var itemList = items.ToList();
+
+        if (itemList.Count == 0)
+            return new PagedResponse<BitacoraResponse>([], total, paginacion);
+
+        var archivos = await _archivoRepo.GetByBitacoraIdsAsync(itemList.Select(b => b.Id));
+        var archivosPorBitacora = archivos
+            .GroupBy(a => a.BitacoraId)
+            .ToDictionary(g => g.Key, g => (IReadOnlyList<BitacoraArchivo>)g.ToList());
+
+        return new PagedResponse<BitacoraResponse>(
+            itemList.Select(b => ToResponse(b, archivosPorBitacora.GetValueOrDefault(b.Id, []))),
+            total, paginacion);
     }
 
     public async Task<BitacoraResponse?> GetByIdAsync(int id)
     {
         var bitacora = await _repo.GetByIdAsync(id);
-        return bitacora is null ? null : ToResponse(bitacora);
+        if (bitacora is null) return null;
+        var archivos = await _archivoRepo.GetByBitacoraIdAsync(id);
+        return ToResponse(bitacora, archivos.ToList());
     }
 
     public async Task<BitacoraResponse> CreateAsync(CreateBitacoraRequest request, int gestorId)
@@ -63,8 +80,6 @@ public class BitacoraService : IBitacoraService
             RespuestaCliente = request.RespuestaCliente,
             PromesaFechaPago = request.PromesaFechaPago?.ToDateTime(TimeOnly.MinValue),
             PromesaMonto = request.PromesaMonto,
-            UrlGrabacion = request.UrlGrabacion,
-            UrlEvidencia = request.UrlEvidencia,
             Observaciones = request.Observaciones,
             GeolocalizacionLat = request.GeolocalizacionLat,
             GeolocalizacionLng = request.GeolocalizacionLng,
@@ -78,7 +93,7 @@ public class BitacoraService : IBitacoraService
         };
 
         var created = await _repo.CreateAsync(entity);
-        return ToResponse(created);
+        return ToResponse(created, []);
     }
 
     public async Task<BitacoraResponse> UpdateAsync(int id, UpdateBitacoraRequest request, int gestorId)
@@ -106,8 +121,6 @@ public class BitacoraService : IBitacoraService
         existing.PromesaFechaPago = request.PromesaFechaPago?.ToDateTime(TimeOnly.MinValue);
         existing.PromesaMonto = request.PromesaMonto;
         existing.PromesaCumplida = request.PromesaCumplida;
-        existing.UrlGrabacion = request.UrlGrabacion;
-        existing.UrlEvidencia = request.UrlEvidencia;
         existing.Observaciones = request.Observaciones;
         existing.GeolocalizacionLat = request.GeolocalizacionLat;
         existing.GeolocalizacionLng = request.GeolocalizacionLng;
@@ -119,7 +132,8 @@ public class BitacoraService : IBitacoraService
         existing.Estatus = request.Estatus;
 
         var updated = await _repo.UpdateAsync(existing);
-        return ToResponse(updated);
+        var archivos = await _archivoRepo.GetByBitacoraIdAsync(id);
+        return ToResponse(updated, archivos.ToList());
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -132,29 +146,60 @@ public class BitacoraService : IBitacoraService
 
     public async Task<BitacoraResponse> SubirGrabacionAsync(int id, IFormFile archivo)
     {
-        var existing = await _repo.GetByIdAsync(id)
+        _ = await _repo.GetByIdAsync(id)
             ?? throw new NotFoundException($"Bitácora con id {id} no encontrada.");
 
-        _fileStorage.EliminarArchivo(existing.UrlGrabacion);
+        var url = await _fileStorage.GuardarGrabacionAsync(archivo, id);
+        await _archivoRepo.AddAsync(new BitacoraArchivo
+        {
+            BitacoraId = id,
+            Tipo = "GRABACION",
+            Url = url,
+            NombreOriginal = archivo.FileName,
+            CreatedAt = DateTime.UtcNow
+        });
 
-        var urlNueva = await _fileStorage.GuardarGrabacionAsync(archivo, id);
-        var updated = await _repo.UpdateUrlGrabacionAsync(id, urlNueva);
-        return ToResponse(updated);
+        var bitacora = await _repo.GetByIdAsync(id);
+        var archivos = await _archivoRepo.GetByBitacoraIdAsync(id);
+        return ToResponse(bitacora!, archivos.ToList());
     }
 
     public async Task<BitacoraResponse> SubirEvidenciaAsync(int id, IFormFile archivo)
     {
-        var existing = await _repo.GetByIdAsync(id)
+        _ = await _repo.GetByIdAsync(id)
             ?? throw new NotFoundException($"Bitácora con id {id} no encontrada.");
 
-        _fileStorage.EliminarArchivo(existing.UrlEvidencia);
+        var url = await _fileStorage.GuardarEvidenciaAsync(archivo, id);
+        await _archivoRepo.AddAsync(new BitacoraArchivo
+        {
+            BitacoraId = id,
+            Tipo = "EVIDENCIA",
+            Url = url,
+            NombreOriginal = archivo.FileName,
+            CreatedAt = DateTime.UtcNow
+        });
 
-        var urlNueva = await _fileStorage.GuardarEvidenciaAsync(archivo, id);
-        var updated = await _repo.UpdateUrlEvidenciaAsync(id, urlNueva);
-        return ToResponse(updated);
+        var bitacora = await _repo.GetByIdAsync(id);
+        var archivos = await _archivoRepo.GetByBitacoraIdAsync(id);
+        return ToResponse(bitacora!, archivos.ToList());
     }
 
-    private BitacoraResponse ToResponse(Bitacora b) => new(
+    public async Task<bool> EliminarArchivoAsync(int bitacoraId, int archivoId)
+    {
+        _ = await _repo.GetByIdAsync(bitacoraId)
+            ?? throw new NotFoundException($"Bitácora con id {bitacoraId} no encontrada.");
+
+        var archivo = await _archivoRepo.GetByIdAsync(archivoId)
+            ?? throw new NotFoundException($"Archivo con id {archivoId} no encontrado.");
+
+        if (archivo.BitacoraId != bitacoraId)
+            throw new BadRequestException($"El archivo {archivoId} no pertenece a la bitácora {bitacoraId}.");
+
+        _fileStorage.EliminarArchivo(archivo.Url);
+        return await _archivoRepo.DeleteAsync(archivoId);
+    }
+
+    private BitacoraResponse ToResponse(Bitacora b, IReadOnlyList<BitacoraArchivo> archivos) => new(
         b.Id,
         b.AmortizacionId,
         b.CreditoId,
@@ -172,8 +217,6 @@ public class BitacoraService : IBitacoraService
         b.PromesaFechaPago.HasValue ? DateOnly.FromDateTime(b.PromesaFechaPago.Value) : null,
         b.PromesaMonto,
         b.PromesaCumplida,
-        ToAbsoluteUrl(b.UrlGrabacion),
-        ToAbsoluteUrl(b.UrlEvidencia),
         b.Observaciones,
         b.GeolocalizacionLat,
         b.GeolocalizacionLng,
@@ -183,7 +226,17 @@ public class BitacoraService : IBitacoraService
         b.DiasVencidos,
         b.CarteraVencidaContable,
         b.Demanda,
-        b.Estatus
+        b.Estatus,
+        archivos.Select(ToArchivoResponse).ToList()
+    );
+
+    private BitacoraArchivoResponse ToArchivoResponse(BitacoraArchivo a) => new(
+        a.Id,
+        a.BitacoraId,
+        a.Tipo,
+        ToAbsoluteUrl(a.Url) ?? a.Url,
+        a.NombreOriginal,
+        a.CreatedAt
     );
 
     private string? ToAbsoluteUrl(string? rutaRelativa)

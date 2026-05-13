@@ -73,6 +73,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddScoped<IGrupoAsignadoRepository, GrupoAsignadoRepository>();
     builder.Services.AddScoped<IReporteRepository, ReporteRepository>();
     builder.Services.AddScoped<IBitacoraRepository, BitacoraRepository>();
+    builder.Services.AddScoped<IBitacoraArchivoRepository, BitacoraArchivoRepository>();
 
     // Servicios de negocio
     // builder.Services.AddScoped<IProductoService, ProductoService>();
