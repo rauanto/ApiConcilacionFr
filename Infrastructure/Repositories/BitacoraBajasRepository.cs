@@ -40,36 +40,47 @@ public class BitacoraBajasRepository : IBitacoraBajasRepository
 
     public async Task<long> CreateAsync(BitacoraBajas bitacoraBaja)
     {
-        using var connection = _connectionFactory.CreateConnection();
+        long id = 0;
 
-        var parameters = new DynamicParameters();
-        parameters.Add("p_credito_id", bitacoraBaja.CreditoId);
-        parameters.Add("p_cliente_id", bitacoraBaja.ClienteId);
-        parameters.Add("p_monto_otorgado", bitacoraBaja.MontoOtorgado);
-        parameters.Add("p_saldo_capital", bitacoraBaja.SaldoCapital);
-        parameters.Add("p_saldo_insoluto", bitacoraBaja.SaldoInsoluto);
-        parameters.Add("p_capital_vencido", bitacoraBaja.CapitalVencido);
-        parameters.Add("p_amorticaciones_vencidas", bitacoraBaja.AmorticacionesVencidas);
-        parameters.Add("p_interes_cobrado", bitacoraBaja.InteresCobrado);
-        parameters.Add("p_dias_vencidos", bitacoraBaja.DiasVencidos);
-        parameters.Add("p_cartera_vencida_contable", bitacoraBaja.CarteraVencidaContable);
-        parameters.Add("p_demanda", bitacoraBaja.Demanda);
-        parameters.Add("p_estatus", bitacoraBaja.Estatus);
-        parameters.Add("p_fecha_alta", bitacoraBaja.FechaAlta);
-        parameters.Add("p_fecha_vencimiento", bitacoraBaja.FechaVencimiento);
-        parameters.Add("p_inicio_cobranza", bitacoraBaja.InicioCobranza);
-        parameters.Add("p_ult_cobranza", bitacoraBaja.UltCobranza);
-        parameters.Add("p_gestor_id", bitacoraBaja.GestorId);
-        parameters.Add("p_grupo_id", bitacoraBaja.GrupoId);
-        parameters.Add("p_obervaciones", bitacoraBaja.Obervaciones);
-        parameters.Add("p_nombre_cliente", bitacoraBaja.NombreCliente);
-        parameters.Add("p_sindicato", bitacoraBaja.Sindicato);
-        parameters.Add("p_baja", bitacoraBaja.Baja);
+        await _auditHelper.ExecuteWithAuditAsync(
+            "BitacoraBajas",
+            bitacoraBaja.CreditoId.ToString(),
+            "CREATE",
+            null,
+            bitacoraBaja,
+            async () =>
+            {
+                using var connection = _connectionFactory.CreateConnection();
 
-        var id = await connection.QuerySingleAsync<long>(
-            "bitacora.sp_insertar_bitacora_baja",
-            parameters,
-            commandType: CommandType.StoredProcedure);
+                var parameters = new DynamicParameters();
+                parameters.Add("p_credito_id", bitacoraBaja.CreditoId);
+                parameters.Add("p_cliente_id", bitacoraBaja.ClienteId);
+                parameters.Add("p_monto_otorgado", bitacoraBaja.MontoOtorgado);
+                parameters.Add("p_saldo_capital", bitacoraBaja.SaldoCapital);
+                parameters.Add("p_saldo_insoluto", bitacoraBaja.SaldoInsoluto);
+                parameters.Add("p_capital_vencido", bitacoraBaja.CapitalVencido);
+                parameters.Add("p_amorticaciones_vencidas", bitacoraBaja.AmorticacionesVencidas);
+                parameters.Add("p_interes_cobrado", bitacoraBaja.InteresCobrado);
+                parameters.Add("p_dias_vencidos", bitacoraBaja.DiasVencidos);
+                parameters.Add("p_cartera_vencida_contable", bitacoraBaja.CarteraVencidaContable);
+                parameters.Add("p_demanda", bitacoraBaja.Demanda);
+                parameters.Add("p_estatus", bitacoraBaja.Estatus);
+                parameters.Add("p_fecha_alta", bitacoraBaja.FechaAlta);
+                parameters.Add("p_fecha_vencimiento", bitacoraBaja.FechaVencimiento);
+                parameters.Add("p_inicio_cobranza", bitacoraBaja.InicioCobranza);
+                parameters.Add("p_ult_cobranza", bitacoraBaja.UltCobranza);
+                parameters.Add("p_gestor_id", bitacoraBaja.GestorId);
+                parameters.Add("p_grupo_id", bitacoraBaja.GrupoId);
+                parameters.Add("p_obervaciones", bitacoraBaja.Obervaciones);
+                parameters.Add("p_nombre_cliente", bitacoraBaja.NombreCliente);
+                parameters.Add("p_sindicato", bitacoraBaja.Sindicato);
+                parameters.Add("p_baja", bitacoraBaja.Baja);
+
+                id = await connection.QuerySingleAsync<long>(
+                    "bitacora.sp_insertar_bitacora_baja",
+                    parameters,
+                    commandType: CommandType.StoredProcedure);
+            });
 
         return id;
     }
@@ -118,7 +129,7 @@ public class BitacoraBajasRepository : IBitacoraBajasRepository
     private async Task<BitacoraBajas?> GetByCreditoIdAsync(long creditoId)
     {
         using var connection = _connectionFactory.CreateConnection();
-        var sql = "SELECT * FROM bitacora.bitacora_bajas WHERE credito_id = @CreditoId LIMIT 1";
+        var sql = "SELECT * FROM bitacora.bitacora_bajas WHERE CreditoId = @CreditoId LIMIT 1";
         return await connection.QuerySingleOrDefaultAsync<BitacoraBajas>(sql, new { CreditoId = creditoId });
     }
 }
