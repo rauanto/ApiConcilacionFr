@@ -34,20 +34,21 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     // Configurar Audit.NET para MySQL
     // Program.cs
     var auditConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    // Forzamos que la conexión de auditoría use el esquema correcto ignorando el default
+    // Forzamos que la conexión de auditoría apunte al esquema 'autentificacion' donde existe la tabla de logs
     if (!auditConnectionString.Contains("Database=autentificacion"))
     {
-        // Reemplazamos el database original por el de autentificacion solo para los logs
-        auditConnectionString = auditConnectionString.Replace("creditos_fincrece_conciliacion", "autentificacion");
+        auditConnectionString = System.Text.RegularExpressions.Regex
+            .Replace(auditConnectionString, @"Database=[^;]+", "Database=autentificacion");
     }
 
     Audit.Core.Configuration.Setup()
         .UseMySql(config => config
             .ConnectionString(auditConnectionString)
-            .TableName("auditoriaregistros") // Ya no necesitas poner el punto ni el esquema aquí
+            .TableName("auditoriaregistros")
             .IdColumnName("Id")
             .JsonColumnName("Data")
             .CustomColumn("Entidad", ev => ev.CustomFields["Entidad"])
+            .CustomColumn("EntidadId", ev => ev.CustomFields["EntidadId"])
             .CustomColumn("Operacion", ev => ev.EventType)
             .CustomColumn("UsuarioResponsable", ev => ev.CustomFields["Usuario"]));
 

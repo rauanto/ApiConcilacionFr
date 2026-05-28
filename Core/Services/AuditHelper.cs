@@ -14,9 +14,9 @@ public class AuditHelper : IAuditHelper
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task ExecuteWithAuditAsync(string entidad, string id, string operacion, 
-                                          object? anterior, object? nuevo, 
-                                          Func<Task> action)
+    public async Task ExecuteWithAuditAsync(string entidad, string id, string operacion,
+        object? anterior, object? nuevo,
+        Func<Task> action)
     {
         // Obtención automática del usuario desde el JWT
         var user = _httpContextAccessor.HttpContext?.User;
