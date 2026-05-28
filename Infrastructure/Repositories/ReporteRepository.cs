@@ -1,4 +1,5 @@
 // Infrastructure/Repositories/ReporteRepository.cs
+
 using System.Data;
 using ApiConcilacionFr.Core.Interfaces;
 using ApiConcilacionFr.Domain.Entities;
@@ -19,16 +20,13 @@ public class ReporteRepository : IReporteRepository
     public async Task<IEnumerable<ReporteCartera>> GetCarteraPorGrupoAsync(string grupos)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        
-        // Dapper maneja el stored procedure automáticamente cuando se le indica CommandType.StoredProcedure
-        // Sin embargo, si la base de datos principal de este proc no es creditos_fincrece_conciliacion
-        // sino que debes llamarlo incluyendo el nombre del Schema como "fincrece.sp_...", se debe de poner directo
-        // En este caso llamamos mediante el método habitual.
+
+
         var parametros = new DynamicParameters();
         parametros.Add("grupos_param", grupos);
-        
+
         var sql = "CALL sp_ReporteCarteraPorGrupo(@Grupos);";
-        
+
         return await connection.QueryAsync<ReporteCartera>(sql, new { Grupos = grupos });
     }
 
@@ -47,65 +45,79 @@ public class ReporteRepository : IReporteRepository
     }
 
     #region Liquidados por grupo y nombre
-    public async Task<IEnumerable<ReporteLiquidadosgrupo>> GetLiquidadosGrupoAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId)
+
+    public async Task<IEnumerable<ReporteLiquidadosgrupo>> GetLiquidadosGrupoAsync(DateTime fechaInicio,
+        DateTime? fechaFin, string rol, int usuarioId)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
         var sql = "CALL sp_reporte_liquidados_grupo(@FechaInicio,@FechaFin,@Rol,@UsuarioId);";
-        return await connection.QueryAsync<ReporteLiquidadosgrupo>(sql, new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId });
+        return await connection.QueryAsync<ReporteLiquidadosgrupo>(sql,
+            new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId });
     }
 
-    public async Task<IEnumerable<ReporteLiquidadosAcreditados>> GetLiquidadosAcreditadosAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId, int grupo)
+    public async Task<IEnumerable<ReporteLiquidadosAcreditados>> GetLiquidadosAcreditadosAsync(DateTime fechaInicio,
+        DateTime? fechaFin, string rol, int usuarioId, int grupo)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
         var sql = "CALL sp_reporte_liquidados_grupo_acreditados(@FechaInicio,@FechaFin,@Rol,@UsuarioId,@Grupo);";
-        return await connection.QueryAsync<ReporteLiquidadosAcreditados>(sql, new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId, Grupo = grupo });
+        return await connection.QueryAsync<ReporteLiquidadosAcreditados>(sql,
+            new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId, Grupo = grupo });
     }
 
-
     #endregion
-
 
 
     #region Historico Cartera
-    public async Task<IEnumerable<ReporteCarteraEjecutivoHistorico>> GetCarteraEjecutivoHistoricoAsync(int mes, int anio, int usuarioId, string rol,int tipoReporte)
+
+    public async Task<IEnumerable<ReporteCarteraEjecutivoHistorico>> GetCarteraEjecutivoHistoricoAsync(int mes,
+        int anio, int usuarioId, string rol, int tipoReporte)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
         var sql = "CALL sp_consultar_historico_cartera(@p_mes, @p_anio, @p_usuario_id, @p_rol,@tipo_reporte);";
-        return await connection.QueryAsync<ReporteCarteraEjecutivoHistorico>(sql, new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
+        return await connection.QueryAsync<ReporteCarteraEjecutivoHistorico>(sql,
+            new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
     }
 
-    public async Task<IEnumerable<ReporteCarteraHisotoricoGrupo>> GetCarteraEjecutivoHistoricoGrupoAsync(int mes, int anio, int usuarioId, string rol, int tipoReporte)
+    public async Task<IEnumerable<ReporteCarteraHisotoricoGrupo>> GetCarteraEjecutivoHistoricoGrupoAsync(int mes,
+        int anio, int usuarioId, string rol, int tipoReporte)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
         var sql = "CALL sp_consultar_historico_cartera_grupo(@p_mes, @p_anio, @p_usuario_id, @p_rol ,@tipo_reporte);";
-        return await connection.QueryAsync<ReporteCarteraHisotoricoGrupo>(sql, new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
+        return await connection.QueryAsync<ReporteCarteraHisotoricoGrupo>(sql,
+            new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
     }
 
-    public async Task<IEnumerable<ReporteCarteraEjecutivoHistoricoAcreditados>> GetCarteraEjecutivoHistoricoAcreditadosAsync(int mes, int anio, int S_GRUPO, int tipoReporte){
+    public async Task<IEnumerable<ReporteCarteraEjecutivoHistoricoAcreditados>>
+        GetCarteraEjecutivoHistoricoAcreditadosAsync(int mes, int anio, int S_GRUPO, int tipoReporte)
+    {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = "CALL autentificacion.sp_consultar_historico_cartera_grupo_acreditado(@p_mes, @p_anio,@tipo_reporte, @s_grup );";
-        return await connection.QueryAsync<ReporteCarteraEjecutivoHistoricoAcreditados>(sql, new { p_mes = mes, p_anio = anio,  tipo_reporte = tipoReporte, s_grup =S_GRUPO ,});
+        var sql =
+            "CALL autentificacion.sp_consultar_historico_cartera_grupo_acreditado(@p_mes, @p_anio,@tipo_reporte, @s_grup );";
+        return await connection.QueryAsync<ReporteCarteraEjecutivoHistoricoAcreditados>(sql,
+            new { p_mes = mes, p_anio = anio, tipo_reporte = tipoReporte, s_grup = S_GRUPO, });
     }
-
-
 
     #endregion
 
-    
 
     #region Otorgados por grupo y nombre
-    public async Task<IEnumerable<ReporteOtorgadosGrupo>> GetOtorgadosGrupoAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId)
+
+    public async Task<IEnumerable<ReporteOtorgadosGrupo>> GetOtorgadosGrupoAsync(DateTime fechaInicio,
+        DateTime? fechaFin, string rol, int usuarioId)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
         var sql = "CALL sp_reporte_otorgados_grupo(@FechaInicio,@FechaFin,@Rol,@UsuarioId);";
-        return await connection.QueryAsync<ReporteOtorgadosGrupo>(sql, new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId });
+        return await connection.QueryAsync<ReporteOtorgadosGrupo>(sql,
+            new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId });
     }
 
-    public async Task<IEnumerable<ReporteOtorgadosAcreditados>> GetOtorgadosAcreditadosAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId, int grupo)
+    public async Task<IEnumerable<ReporteOtorgadosAcreditados>> GetOtorgadosAcreditadosAsync(DateTime fechaInicio,
+        DateTime? fechaFin, string rol, int usuarioId, int grupo)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
         var sql = "CALL sp_reporte_otorgados_grupo_acreditados(@FechaInicio,@FechaFin,@Rol,@UsuarioId,@Grupo);";
-        return await connection.QueryAsync<ReporteOtorgadosAcreditados>(sql, new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId, Grupo = grupo });
+        return await connection.QueryAsync<ReporteOtorgadosAcreditados>(sql,
+            new { FechaInicio = fechaInicio, FechaFin = fechaFin, Rol = rol, UsuarioId = usuarioId, Grupo = grupo });
     }
 
     #endregion

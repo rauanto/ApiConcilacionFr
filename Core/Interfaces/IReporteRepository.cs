@@ -8,18 +8,11 @@ public interface IReporteRepository
     Task<IEnumerable<ReporteCartera>> GetCarteraPorGrupoAsync(string grupos);
     Task<IEnumerable<ReporteCarteraEjecutivo>> GetCarteraEjecutivosAsync(int usuarioId, string rol);
     Task<IEnumerable<Amortizacion>> ObtenerAmortizacionAsync(int pqClave);
-
     Task<IEnumerable<ReporteLiquidadosgrupo>> GetLiquidadosGrupoAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId);
-
     Task<IEnumerable<ReporteLiquidadosAcreditados>> GetLiquidadosAcreditadosAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId, int grupo);
-
     Task<IEnumerable<ReporteCarteraEjecutivoHistorico>> GetCarteraEjecutivoHistoricoAsync(int mes, int anio, int usuarioId, string rol,int tipoReporte);
-
     Task<IEnumerable<ReporteOtorgadosGrupo>> GetOtorgadosGrupoAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId);
-
     Task<IEnumerable<ReporteOtorgadosAcreditados>> GetOtorgadosAcreditadosAsync(DateTime fechaInicio, DateTime? fechaFin, string rol, int usuarioId, int grupo);
-
     Task<IEnumerable<ReporteCarteraHisotoricoGrupo>> GetCarteraEjecutivoHistoricoGrupoAsync(int mes, int anio, int usuarioId, string rol,int tipoReporte);
-
     Task<IEnumerable<ReporteCarteraEjecutivoHistoricoAcreditados>> GetCarteraEjecutivoHistoricoAcreditadosAsync(int mes, int anio, int S_GRUPO,int tipoReporte);
 }

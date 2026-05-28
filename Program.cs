@@ -74,11 +74,13 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddScoped<IReporteRepository, ReporteRepository>();
     builder.Services.AddScoped<IBitacoraRepository, BitacoraRepository>();
     builder.Services.AddScoped<IBitacoraArchivoRepository, BitacoraArchivoRepository>();
+    builder.Services.AddScoped<IBitacoraBajasRepository, BitacoraBajasRepository>();
 
     // Servicios de negocio
     // builder.Services.AddScoped<IProductoService, ProductoService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<IBitacoraService, BitacoraService>();
+    builder.Services.AddScoped<IBitacoraBajasService, BitacoraBajasService>();
     builder.Services.AddSingleton<IFileStorageService, LocalFileStorageService>();
 
     // FluentValidation — auto-registro de todos los validators del ensamblado
