@@ -8,7 +8,8 @@ public record BitacoraFiltros(
     int? ClienteId = null,
     int? GestorId = null,
     DateTime? FechaDesde = null,
-    DateTime? FechaHasta = null
+    DateTime? FechaHasta = null,
+    IEnumerable<int>? AmortizacionIds = null
 );
 
 public interface IBitacoraRepository

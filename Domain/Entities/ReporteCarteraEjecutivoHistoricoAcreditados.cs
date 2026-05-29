@@ -10,9 +10,9 @@ public class ReporteCarteraEjecutivoHistoricoAcreditados
     public double saldo_cartera { get; set; }
     public double capital_vencido { get; set; }
     public double saldo_final { get; set; }
-    public string tipo { get; set; }
+    public string? tipo { get; set; }
     public int s_grupo { get; set; }
-    public string nombre_grupo { get; set; }
+    public string? nombre_grupo { get; set; }
     
     public string? S_NOMBRE { get; set; }
     public int cliente { get; set; }

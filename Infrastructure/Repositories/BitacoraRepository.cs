@@ -52,7 +52,8 @@ public class BitacoraRepository : IBitacoraRepository
           AND (@ClienteId IS NULL OR cliente_id = @ClienteId)
           AND (@GestorId  IS NULL OR gestor_id  = @GestorId)
           AND (@FechaDesde IS NULL OR fecha_hora_gestion >= @FechaDesde)
-          AND (@FechaHasta IS NULL OR fecha_hora_gestion <= @FechaHasta)";
+          AND (@FechaHasta IS NULL OR fecha_hora_gestion <= @FechaHasta)
+          AND (@HasAmortizacionIds = 0 OR amortizacion_id IN @AmortizacionIds)";
 
     public async Task<(IEnumerable<Bitacora> Items, int Total)> GetAllAsync(
         BitacoraFiltros filtros, PaginationParams paginacion)
@@ -66,6 +67,8 @@ public class BitacoraRepository : IBitacoraRepository
             filtros.GestorId,
             filtros.FechaDesde,
             filtros.FechaHasta,
+            HasAmortizacionIds = filtros.AmortizacionIds != null && filtros.AmortizacionIds.Any() ? 1 : 0,
+            AmortizacionIds = filtros.AmortizacionIds != null && filtros.AmortizacionIds.Any() ? filtros.AmortizacionIds : new[] { -1 },
             paginacion.PageSize,
             Offset = (paginacion.Page - 1) * paginacion.PageSize
         };

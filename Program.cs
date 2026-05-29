@@ -35,7 +35,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     // Program.cs
     var auditConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     // Forzamos que la conexión de auditoría apunte al esquema 'autentificacion' donde existe la tabla de logs
-    if (!auditConnectionString.Contains("Database=autentificacion"))
+    if (auditConnectionString != null && !auditConnectionString.Contains("Database=autentificacion"))
     {
         auditConnectionString = System.Text.RegularExpressions.Regex
             .Replace(auditConnectionString, @"Database=[^;]+", "Database=autentificacion");
@@ -76,13 +76,20 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddScoped<IBitacoraRepository, BitacoraRepository>();
     builder.Services.AddScoped<IBitacoraArchivoRepository, BitacoraArchivoRepository>();
     builder.Services.AddScoped<IBitacoraBajasRepository, BitacoraBajasRepository>();
+    builder.Services.AddScoped<ISocioRepository, SocioRepository>();
 
     // Servicios de negocio
     // builder.Services.AddScoped<IProductoService, ProductoService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<IBitacoraService, BitacoraService>();
     builder.Services.AddScoped<IBitacoraBajasService, BitacoraBajasService>();
+    builder.Services.AddScoped<ISocioService, SocioService>();
     builder.Services.AddSingleton<IFileStorageService, LocalFileStorageService>();
+    
+    // PDF Reportes y Http Client
+    builder.Services.AddScoped<IReportePdfService, ReportePdfService>();
+    builder.Services.AddHttpClient();
+    QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
     // FluentValidation — auto-registro de todos los validators del ensamblado
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();

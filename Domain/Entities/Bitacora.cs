@@ -9,9 +9,9 @@ public class Bitacora
     public int GestorId { get; set; }
     public int? MedioContactoId { get; set; }
     public DateTime FechaHoraGestion { get; set; }
-    public string TipoGestion { get; set; }
-    public string Sentido { get; set; }
-    public string Resultado { get; set; }
+    public string? TipoGestion { get; set; }
+    public string? Sentido { get; set; }
+    public string? Resultado { get; set; }
     public int? DuracionSegundos { get; set; }
     public string? MensajeEnviado { get; set; }
     public string? Asunto { get; set; }

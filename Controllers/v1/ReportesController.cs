@@ -14,10 +14,12 @@ namespace ApiConcilacionFr.Controllers.v1;
 public class ReportesController : ControllerBase
 {
     private readonly IReporteRepository _reporteRepo;
+    private readonly IReportePdfService _reportePdfService;
 
-    public ReportesController(IReporteRepository reporteRepo)
+    public ReportesController(IReporteRepository reporteRepo, IReportePdfService reportePdfService)
     {
         _reporteRepo = reporteRepo;
+        _reportePdfService = reportePdfService;
     }
 
     public record ReporteCarteraResponse(int TotalRegistros, IEnumerable<ReporteCartera> Registros);
@@ -71,6 +73,40 @@ public class ReportesController : ControllerBase
         var resultado = await _reporteRepo.ObtenerAmortizacionAsync(pqClave);
 
         return Ok(ApiResponse<IEnumerable<Amortizacion>>.Success(resultado, "Amortización obtenida con éxito."));
+    }
+
+    /// <summary>
+    /// Genera un reporte PDF de las amortizaciones de un trámite/cliente, incluyendo bitácoras.
+    /// </summary>
+    [HttpGet("amortizacion/{pqClave}/pdf")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAmortizacionPdf(int pqClave, [FromQuery] long clienteId)
+    {
+        var pdfBytes = await _reportePdfService.GenerarReporteAmortizacionesPdfAsync(pqClave, clienteId, incluirBitacoras: true);
+        
+        if (pdfBytes == null || pdfBytes.Length == 0)
+        {
+            return NotFound(ApiResponse<object>.Failure("No se encontraron datos para generar el PDF."));
+        }
+
+        return File(pdfBytes, "application/pdf", $"ReporteAmortizaciones_Completo_{pqClave}.pdf");
+    }
+
+    /// <summary>
+    /// Genera un reporte PDF de las amortizaciones de un trámite/cliente SIN incluir bitácoras.
+    /// </summary>
+    [HttpGet("amortizacion/{pqClave}/pdf-simple")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAmortizacionPdfSimple(int pqClave, [FromQuery] long clienteId)
+    {
+        var pdfBytes = await _reportePdfService.GenerarReporteAmortizacionesPdfAsync(pqClave, clienteId, incluirBitacoras: false);
+        
+        if (pdfBytes == null || pdfBytes.Length == 0)
+        {
+            return NotFound(ApiResponse<object>.Failure("No se encontraron datos para generar el PDF."));
+        }
+
+        return File(pdfBytes, "application/pdf", $"ReporteAmortizaciones_Simple_{pqClave}.pdf");
     }
 
     #region Liquidados Por grupo y Nombre
