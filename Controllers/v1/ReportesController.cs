@@ -14,12 +14,17 @@ namespace ApiConcilacionFr.Controllers.v1;
 public class ReportesController : ControllerBase
 {
     private readonly IReporteRepository _reporteRepo;
-    private readonly IReportePdfService _reportePdfService;
+    private readonly IReportePdfSimpleService _reportePdfSimpleService;
+    private readonly IReportePdfCompletoService _reportePdfCompletoService;
 
-    public ReportesController(IReporteRepository reporteRepo, IReportePdfService reportePdfService)
+    public ReportesController(
+        IReporteRepository reporteRepo, 
+        IReportePdfSimpleService reportePdfSimpleService,
+        IReportePdfCompletoService reportePdfCompletoService)
     {
         _reporteRepo = reporteRepo;
-        _reportePdfService = reportePdfService;
+        _reportePdfSimpleService = reportePdfSimpleService;
+        _reportePdfCompletoService = reportePdfCompletoService;
     }
 
     public record ReporteCarteraResponse(int TotalRegistros, IEnumerable<ReporteCartera> Registros);
@@ -82,7 +87,7 @@ public class ReportesController : ControllerBase
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAmortizacionPdf(int pqClave, [FromQuery] long clienteId)
     {
-        var pdfBytes = await _reportePdfService.GenerarReporteAmortizacionesPdfAsync(pqClave, clienteId, incluirBitacoras: true);
+        var pdfBytes = await _reportePdfCompletoService.GenerarReportePdfAsync(pqClave, clienteId);
         
         if (pdfBytes == null || pdfBytes.Length == 0)
         {
@@ -99,7 +104,7 @@ public class ReportesController : ControllerBase
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAmortizacionPdfSimple(int pqClave, [FromQuery] long clienteId)
     {
-        var pdfBytes = await _reportePdfService.GenerarReporteAmortizacionesPdfAsync(pqClave, clienteId, incluirBitacoras: false);
+        var pdfBytes = await _reportePdfSimpleService.GenerarReportePdfAsync(pqClave, clienteId);
         
         if (pdfBytes == null || pdfBytes.Length == 0)
         {
@@ -228,7 +233,7 @@ public class ReportesController : ControllerBase
     #region historico cartera grupo
     [HttpGet("carteraEjecutivoHistoricoGrupo")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteCarteraHisotoricoGrupo>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCarteraEjecutivoHistoricoGrupo([FromQuery] int mes, [FromQuery] int anio, [FromQuery] int tipo_reporte)
+    public async Task<IActionResult> GetCarteraEjecutivoHistoricoGrupo([FromQuery] DateTime fechaReporte, [FromQuery] int tipo_reporte)
     {
         var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
         var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
@@ -239,17 +244,12 @@ public class ReportesController : ControllerBase
             return Unauthorized(ApiResponse<object>.Failure("Token inválido o mal formado."));
         }
 
-        if (mes == 0)
+        if (fechaReporte == DateTime.MinValue)
         {
-            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un mes válido."));
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar una fecha válida."));
         }
 
-        if (anio == 0)
-        {
-            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar una fecha de fin válida."));
-        }
-
-        var resultado = await _reporteRepo.GetCarteraEjecutivoHistoricoGrupoAsync(mes,  anio  , userId, rolName, tipo_reporte);
+        var resultado = await _reporteRepo.GetCarteraEjecutivoHistoricoGrupoAsync(fechaReporte, userId, rolName, tipo_reporte);
 
         return Ok(ApiResponse<IEnumerable<ReporteCarteraHisotoricoGrupo>>.Success(resultado, "Reporte de cartera de ejecutivos histórico por grupo obtenido con éxito."));
     }
@@ -260,20 +260,15 @@ public class ReportesController : ControllerBase
     #region Historico detalle por grupo
     [HttpGet("carteraEjecutivoHistoricoAcreditado")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ReporteCarteraEjecutivoHistoricoAcreditados>>),StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCarteraEjecutivoHistoricoAcreditados([FromQuery] int mes,[FromQuery] int anio, [FromQuery] int S_GRUPO,[FromQuery] int tipo_reporte ){
-        if (mes == 0)
+    public async Task<IActionResult> GetCarteraEjecutivoHistoricoAcreditados([FromQuery] DateTime fechaReporte, [FromQuery] int S_GRUPO,[FromQuery] int tipo_reporte ){
+        if (fechaReporte == DateTime.MinValue)
         {
-            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un mes válido."));
-        }
-
-        if (anio == 0)
-        {
-            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar una fecha de fin válida."));
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar una fecha válida."));
         }
 
 
         var resultado =
-            await _reporteRepo.GetCarteraEjecutivoHistoricoAcreditadosAsync(mes, anio, S_GRUPO, tipo_reporte);
+            await _reporteRepo.GetCarteraEjecutivoHistoricoAcreditadosAsync(fechaReporte, S_GRUPO, tipo_reporte);
         
         return Ok(ApiResponse<IEnumerable<ReporteCarteraEjecutivoHistoricoAcreditados>>.Success(resultado,"Reporte de Cartera historico por acreditados"));
 

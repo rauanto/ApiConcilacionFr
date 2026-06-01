@@ -87,7 +87,8 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddSingleton<IFileStorageService, LocalFileStorageService>();
     
     // PDF Reportes y Http Client
-    builder.Services.AddScoped<IReportePdfService, ReportePdfService>();
+    builder.Services.AddScoped<IReportePdfSimpleService, ReportePdfSimpleService>();
+    builder.Services.AddScoped<IReportePdfCompletoService, ReportePdfCompletoService>();
     builder.Services.AddHttpClient();
     QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 

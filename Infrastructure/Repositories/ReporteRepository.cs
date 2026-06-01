@@ -69,32 +69,39 @@ public class ReporteRepository : IReporteRepository
 
     #region Historico Cartera
 
-    public async Task<IEnumerable<ReporteCarteraEjecutivoHistorico>> GetCarteraEjecutivoHistoricoAsync(int mes,
-        int anio, int usuarioId, string rol, int tipoReporte)
+    public async Task<IEnumerable<ReporteCarteraEjecutivoHistorico>> GetCarteraEjecutivoHistoricoAsync(DateTime fechaReporte,
+        int usuarioId, string rol, int tipoReporte)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = "CALL sp_consultar_historico_cartera(@p_mes, @p_anio, @p_usuario_id, @p_rol,@tipo_reporte);";
+        var sql = "CALL sp_consultar_historico_cartera(@p_fecha_reporte, @p_usuario_id, @p_rol,@tipo_reporte);";
         return await connection.QueryAsync<ReporteCarteraEjecutivoHistorico>(sql,
-            new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
+            new { p_fecha_reporte = fechaReporte, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
     }
 
-    public async Task<IEnumerable<ReporteCarteraHisotoricoGrupo>> GetCarteraEjecutivoHistoricoGrupoAsync(int mes,
-        int anio, int usuarioId, string rol, int tipoReporte)
+    public async Task<IEnumerable<ReporteCarteraHisotoricoGrupo>> GetCarteraEjecutivoHistoricoGrupoAsync(DateTime fechaReporte,
+        int usuarioId, string rol, int tipoReporte)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = "CALL sp_consultar_historico_cartera_grupo(@p_mes, @p_anio, @p_usuario_id, @p_rol ,@tipo_reporte);";
+        var sql = "CALL sp_consultar_historico_cartera_grupo(@p_fecha_reporte, @p_usuario_id, @p_rol ,@tipo_reporte);";
         return await connection.QueryAsync<ReporteCarteraHisotoricoGrupo>(sql,
-            new { p_mes = mes, p_anio = anio, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
+            new { p_fecha_reporte = fechaReporte, p_usuario_id = usuarioId, p_rol = rol, tipo_reporte = tipoReporte });
     }
 
     public async Task<IEnumerable<ReporteCarteraEjecutivoHistoricoAcreditados>>
-        GetCarteraEjecutivoHistoricoAcreditadosAsync(int mes, int anio, int S_GRUPO, int tipoReporte)
+        GetCarteraEjecutivoHistoricoAcreditadosAsync(DateTime fechaReporte, int S_GRUPO, int tipoReporte)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
         var sql =
-            "CALL autentificacion.sp_consultar_historico_cartera_grupo_acreditado(@p_mes, @p_anio,@tipo_reporte, @s_grup );";
+            "CALL autentificacion.sp_consultar_historico_cartera_grupo_acreditado(@p_fecha_reporte,@tipo_reporte, @s_grup );";
         return await connection.QueryAsync<ReporteCarteraEjecutivoHistoricoAcreditados>(sql,
-            new { p_mes = mes, p_anio = anio, tipo_reporte = tipoReporte, s_grup = S_GRUPO, });
+            new { p_fecha_reporte = fechaReporte, tipo_reporte = tipoReporte, s_grup = S_GRUPO, });
+    }
+
+    public async Task<IEnumerable<string>> GetFechasReporteCarteraHistoricoAsync()
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        var sql = "SELECT DATE_FORMAT(fecha_registro, '%Y-%m-%d') as fecha_reporte FROM autentificacion.reporte_cartera_historico GROUP BY fecha_reporte ORDER BY fecha_reporte DESC;";
+        return await connection.QueryAsync<string>(sql);
     }
 
     #endregion
