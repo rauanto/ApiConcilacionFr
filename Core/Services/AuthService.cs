@@ -33,9 +33,11 @@ public class AuthService : IAuthService
         if (!BCrypt.Net.BCrypt.Verify(request.Password, usuario.PasswordHash))
             throw new UnauthorizedException("Credenciales incorrectas.");
 
-        var accessToken = JwtExtensions.GenerateToken(usuario, _configuration);
+        var permisos = await _usuarioRepository.GetUserPermissionsAsync(usuario.Id);
+        var roles = await _usuarioRepository.GetUserRolesAsync(usuario.Id);
+        var accessToken = JwtExtensions.GenerateToken(usuario, roles, _configuration);
         var refreshToken = await CreateAndStoreRefreshTokenAsync(usuario.Id);
-        var profile = new UsuarioProfile(usuario.Id, usuario.NombreUsuario, usuario.Correo, usuario.Rol);
+        var profile = new UsuarioProfile(usuario.Id, usuario.NombreUsuario, usuario.Correo, roles, permisos);
 
         return new AuthResponse(accessToken, refreshToken, profile);
     }
@@ -55,16 +57,18 @@ public class AuthService : IAuthService
             NombreUsuario = request.NombreUsuario,
             Correo = request.Correo,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            Rol = "Usuario",
             Activo = true,
             FechaCreacion = DateTime.UtcNow
         };
 
         nuevoUsuario.Id = await _usuarioRepository.CreateAsync(nuevoUsuario);
 
-        var accessToken = JwtExtensions.GenerateToken(nuevoUsuario, _configuration);
+        // By default, new users have no permissions until an admin assigns a role
+        var permisos = new List<string>();
+        var roles = new List<string>();
+        var accessToken = JwtExtensions.GenerateToken(nuevoUsuario, roles, _configuration);
         var refreshToken = await CreateAndStoreRefreshTokenAsync(nuevoUsuario.Id);
-        var profile = new UsuarioProfile(nuevoUsuario.Id, nuevoUsuario.NombreUsuario, nuevoUsuario.Correo, nuevoUsuario.Rol);
+        var profile = new UsuarioProfile(nuevoUsuario.Id, nuevoUsuario.NombreUsuario, nuevoUsuario.Correo, roles, permisos);
 
         return new AuthResponse(accessToken, refreshToken, profile);
     }
@@ -83,9 +87,11 @@ public class AuthService : IAuthService
         // Rotación: invalidar el token actual y emitir uno nuevo
         await _refreshTokenRepository.RevokeAsync(request.RefreshToken);
 
-        var newAccessToken = JwtExtensions.GenerateToken(usuario, _configuration);
+        var permisos = await _usuarioRepository.GetUserPermissionsAsync(usuario.Id);
+        var roles = await _usuarioRepository.GetUserRolesAsync(usuario.Id);
+        var newAccessToken = JwtExtensions.GenerateToken(usuario, roles, _configuration);
         var newRefreshToken = await CreateAndStoreRefreshTokenAsync(usuario.Id);
-        var profile = new UsuarioProfile(usuario.Id, usuario.NombreUsuario, usuario.Correo, usuario.Rol);
+        var profile = new UsuarioProfile(usuario.Id, usuario.NombreUsuario, usuario.Correo, roles, permisos);
 
         return new AuthResponse(newAccessToken, newRefreshToken, profile);
     }
@@ -116,7 +122,9 @@ public class AuthService : IAuthService
         if (usuario == null)
             throw new NotFoundException("Usuario no encontrado.");
 
-        return new UsuarioProfile(usuario.Id, usuario.NombreUsuario, usuario.Correo, usuario.Rol);
+        var permisos = await _usuarioRepository.GetUserPermissionsAsync(userId);
+        var roles = await _usuarioRepository.GetUserRolesAsync(userId);
+        return new UsuarioProfile(usuario.Id, usuario.NombreUsuario, usuario.Correo, roles, permisos);
     }
 
     public async Task<IEnumerable<UsuarioBasic>> GetUsuariosAsync()

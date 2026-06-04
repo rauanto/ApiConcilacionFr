@@ -36,7 +36,7 @@ public static class JwtExtensions
         return services;
     }
 
-    public static string GenerateToken(Usuario usuario, IConfiguration configuration)
+    public static string GenerateToken(Usuario usuario, IEnumerable<string> roles, IConfiguration configuration)
     {
         var jwtSettings = configuration.GetSection("JwtSettings");
         var secretKey = jwtSettings["SecretKey"] ?? "SUPER_SECRET_KEY_FALLBACK_WITH_ENOUGH_LENGTH";
@@ -44,14 +44,21 @@ public static class JwtExtensions
         var audience = jwtSettings["Audience"];
         var minutes = double.Parse(jwtSettings["ExpirationMinutes"] ?? "60");
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.UniqueName, usuario.NombreUsuario),
             new Claim(JwtRegisteredClaimNames.Email, usuario.Correo),
-            new Claim(ClaimTypes.Role, usuario.Rol),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+
+        if (roles != null)
+        {
+            foreach (var rol in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, rol));
+            }
+        }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

@@ -52,8 +52,8 @@ public class UsuarioRepository : IUsuarioRepository
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
         var sql = @"
             INSERT INTO autentificacion.Usuarios 
-            (NombreUsuario, Correo, PasswordHash, Rol, Activo, FechaCreacion) 
-            VALUES (@NombreUsuario, @Correo, @PasswordHash, @Rol, @Activo, @FechaCreacion);
+            (NombreUsuario, Correo, PasswordHash, Activo, FechaCreacion) 
+            VALUES (@NombreUsuario, @Correo, @PasswordHash, @Activo, @FechaCreacion);
             SELECT LAST_INSERT_ID();";
 
         return await connection.ExecuteScalarAsync<int>(sql, usuario);
@@ -67,7 +67,6 @@ public class UsuarioRepository : IUsuarioRepository
             SET NombreUsuario = @NombreUsuario, 
                 Correo = @Correo, 
                 PasswordHash = @PasswordHash, 
-                Rol = @Rol, 
                 Activo = @Activo
             WHERE Id = @Id";
 
@@ -80,5 +79,32 @@ public class UsuarioRepository : IUsuarioRepository
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
         return await connection.QueryAsync<Usuario>(
             "SELECT Id, NombreUsuario FROM autentificacion.Usuarios");
+    }
+
+    public async Task<IEnumerable<string>> GetUserPermissionsAsync(int usuarioId)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        var sql = @"
+            SELECT DISTINCT p.Nombre
+            FROM autentificacion.Usuarios u
+            JOIN autentificacion.Usuarios_Roles ur ON u.Id = ur.UsuarioId
+            JOIN autentificacion.Roles_Permisos rp ON ur.RolId = rp.RolId
+            JOIN autentificacion.Permisos p ON rp.PermisoId = p.Id
+            WHERE u.Id = @UsuarioId AND u.Activo = 1;";
+
+        return await connection.QueryAsync<string>(sql, new { UsuarioId = usuarioId });
+    }
+
+    public async Task<IEnumerable<string>> GetUserRolesAsync(int usuarioId)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        var sql = @"
+            SELECT r.Nombre
+            FROM autentificacion.Usuarios u
+            JOIN autentificacion.Usuarios_Roles ur ON u.Id = ur.UsuarioId
+            JOIN autentificacion.Roles r ON ur.RolId = r.Id
+            WHERE u.Id = @UsuarioId AND u.Activo = 1;";
+
+        return await connection.QueryAsync<string>(sql, new { UsuarioId = usuarioId });
     }
 }

@@ -8,7 +8,7 @@ public record RegisterRequest(string NombreUsuario, string Correo, string Passwo
 public record RefreshTokenRequest(string RefreshToken);
 public record LogoutRequest(string RefreshToken);
 public record AuthResponse(string Token, string RefreshToken, UsuarioProfile Profile);
-public record UsuarioProfile(int Id, string NombreUsuario, string Correo, string Rol);
+public record UsuarioProfile(int Id, string NombreUsuario, string Correo, IEnumerable<string> Roles, IEnumerable<string> Permisos);
 public record ChangePasswordRequest(string UserId, string NewPassword);
 
 public interface IAuthService
