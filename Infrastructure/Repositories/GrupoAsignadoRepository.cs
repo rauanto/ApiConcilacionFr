@@ -97,6 +97,7 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
     public async Task<bool> UpdateAsync(GrupoAsignado grupo)
     {
         var estadoAnterior = await GetByIdAsync(grupo.S_GRUPO);
+        int rowsAffected = 0;
 
         await _auditHelper.ExecuteWithAuditAsync(
             "GrupoAsignado", 
@@ -110,10 +111,10 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
                 var sql = @"UPDATE autentificacion.grupo_asignado 
                             SET nombre_grupo = @nombre_grupo, usuario_id = @usuario_id 
                             WHERE S_GRUPO = @S_GRUPO";
-                await connection.ExecuteAsync(sql, grupo);
+                rowsAffected = await connection.ExecuteAsync(sql, grupo);
             });
 
-        return true;
+        return rowsAffected > 0;
     }
 
 

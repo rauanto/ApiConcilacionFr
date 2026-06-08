@@ -100,7 +100,7 @@ public class ReporteRepository : IReporteRepository
     public async Task<IEnumerable<string>> GetFechasReporteCarteraHistoricoAsync()
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = "SELECT DATE_FORMAT(fecha_registro, '%Y-%m-%d') as fecha_reporte FROM autentificacion.reporte_cartera_historico GROUP BY fecha_reporte ORDER BY fecha_reporte DESC;";
+        var sql = "SELECT DATE_FORMAT(fecha_corte, '%Y-%m-%d') as fecha_reporte FROM autentificacion.reporte_cartera_historico GROUP BY fecha_reporte ORDER BY fecha_reporte DESC;";
         return await connection.QueryAsync<string>(sql);
     }
 

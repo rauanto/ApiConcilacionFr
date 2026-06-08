@@ -98,6 +98,23 @@ public class ReportesController : ControllerBase
     }
 
     /// <summary>
+    /// Genera un reporte PDF de una única amortización de un trámite/cliente, incluyendo bitácoras.
+    /// </summary>
+    [HttpGet("amortizacion/{pqClave}/cuota/{aNumero}/pdf")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAmortizacionCuotaPdf(int pqClave, int aNumero, [FromQuery] long clienteId)
+    {
+        var pdfBytes = await _reportePdfCompletoService.GenerarReportePdfCuotaAsync(pqClave, clienteId, aNumero);
+        
+        if (pdfBytes == null || pdfBytes.Length == 0)
+        {
+            return NotFound(ApiResponse<object>.Failure("No se encontraron datos para generar el PDF."));
+        }
+
+        return File(pdfBytes, "application/pdf", $"ReporteAmortizacion_{pqClave}_Cuota_{aNumero}.pdf");
+    }
+
+    /// <summary>
     /// Genera un reporte PDF de las amortizaciones de un trámite/cliente SIN incluir bitácoras.
     /// </summary>
     [HttpGet("amortizacion/{pqClave}/pdf-simple")]

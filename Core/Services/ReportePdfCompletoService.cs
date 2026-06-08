@@ -58,7 +58,11 @@ public class ReportePdfCompletoService : IReportePdfCompletoService
 
             var amortizacionIds = amortizaciones.Select(a => a.A_NUMERO).Distinct().ToList();
 
-            var filtros = new BitacoraFiltros { AmortizacionIds = amortizacionIds };
+            var filtros = new BitacoraFiltros { 
+                AmortizacionIds = amortizacionIds,
+                CreditoId = pqClave,
+                ClienteId = (int)clienteId
+            };
             var paginacion = new PaginationParams { Page = 1, PageSize = 10000 };
             var (bitacoras, _) = await _bitacoraRepository.GetAllAsync(filtros, paginacion);
 
@@ -104,6 +108,78 @@ public class ReportePdfCompletoService : IReportePdfCompletoService
         {
             _logger.LogError(ex, "Error crítico al generar el reporte PDF Completo para el trámite {pqClave}", pqClave);
             throw new BadRequestException("Ocurrió un error interno al generar el reporte PDF Completo.");
+        }
+    }
+
+    public async Task<byte[]> GenerarReportePdfCuotaAsync(int pqClave, long clienteId, int aNumero)
+    {
+        try
+        {
+            _logger.LogInformation("Iniciando generación de PDF Completo para la cuota {aNumero} del trámite {pqClave}", aNumero, pqClave);
+
+            var socio = await _socioService.GetDatosSocioAsync(clienteId);
+
+            var todasAmortizaciones = await _reporteRepository.ObtenerAmortizacionAsync(pqClave);
+            var amortizaciones = todasAmortizaciones?.Where(a => a.A_NUMERO == aNumero).ToList();
+
+            if (amortizaciones == null || !amortizaciones.Any())
+            {
+                _logger.LogWarning("No se encontró la cuota {aNumero} para el trámite {pqClave}", aNumero, pqClave);
+                throw new NotFoundException($"No se encontró la cuota {aNumero} para el trámite {pqClave}");
+            }
+
+            var amortizacionIds = new List<int> { aNumero };
+
+            var filtros = new BitacoraFiltros { 
+                AmortizacionIds = amortizacionIds,
+                CreditoId = pqClave,
+                ClienteId = (int)clienteId
+            };
+            var paginacion = new PaginationParams { Page = 1, PageSize = 10000 };
+            var (bitacoras, _) = await _bitacoraRepository.GetAllAsync(filtros, paginacion);
+
+            var bitacoraIds = bitacoras.Select(b => b.Id).Distinct().ToList();
+            var archivos = bitacoraIds.Any()
+                ? await _bitacoraArchivoRepository.GetByBitacoraIdsAsync(bitacoraIds)
+                : Enumerable.Empty<BitacoraArchivo>();
+
+            var evidencias = archivos.Where(a => a.Tipo.ToUpper() == "EVIDENCIA").ToList();
+
+            var bitacorasPorAmortizacion = bitacoras
+                .GroupBy(b => b.AmortizacionId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var evidenciasPorBitacora = evidencias
+                .GroupBy(e => e.BitacoraId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var seccion = _configuration.GetSection("FileStorage");
+            var carpeta = seccion["RutaBase"] ?? "uploads";
+            var rutaBaseFisica = Path.IsPathRooted(carpeta)
+                ? carpeta
+                : Path.Combine(_env.ContentRootPath, carpeta);
+
+            var document = new AmortizacionCompletoDocument(
+                pqClave,
+                socio,
+                amortizaciones,
+                bitacorasPorAmortizacion,
+                evidenciasPorBitacora,
+                _httpClientFactory.CreateClient(),
+                rutaBaseFisica
+            );
+
+            _logger.LogInformation("Generando bytes del PDF Completo por cuota...");
+            return document.GeneratePdf();
+        }
+        catch (NotFoundException)
+        {
+            throw; // Middleware maneja esto como 404
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error crítico al generar el reporte PDF Completo de cuota {aNumero} para trámite {pqClave}", aNumero, pqClave);
+            throw new BadRequestException("Ocurrió un error interno al generar el reporte PDF.");
         }
     }
 }
