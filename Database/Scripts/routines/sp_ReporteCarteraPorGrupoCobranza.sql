@@ -1,5 +1,5 @@
 create
-definer = root@localhost procedure sp_ReporteCarteraPorGrupo(IN p_lista_grupos text)
+definer = root@localhost procedure sp_ReporteCarteraPorGrupoCobranza(IN p_grupo_cobranza_id INT)
 BEGIN
     SELECT
         *,
@@ -75,7 +75,7 @@ BEGIN
             CASE WHEN Prestamo.PQ_CART_VENCIDA = 1 THEN 'agregado' ELSE 'sin agregar' END AS cartera_vencida_contable,
             CASE WHEN Prestamo.PQ_LITIGIO = 1 THEN 'demandado' ELSE 'sin demanda' END AS demanda,
             /* ============================================================
-               EJECUTIVO ASIGNADO — dinámico desde grupo_asignado + Usuarios
+               EJECUTIVO ASIGNADO
                ============================================================ */
             IFNULL(
                 (
@@ -110,9 +110,14 @@ BEGIN
             AND A_FECHA_LIQUIDACION > CURDATE()
 
             /* ============================================================
-               AQUÍ ES DONDE APLICAMOS EL FILTRO DINÁMICO
+               AQUÍ ES DONDE APLICAMOS EL FILTRO POR GRUPO COBRANZA
                ============================================================ */
-            AND FIND_IN_SET(Socios.S_GRUPO, p_lista_grupos) > 0
+            AND EXISTS (
+                SELECT 1
+                FROM bitacora.grupo_cobranza_credito gcc
+                WHERE gcc.grupo_cobranza_id = p_grupo_cobranza_id
+                  AND gcc.credito_id = Prestamo.PQ_CLAVE
+            )
             
             /* ============================================================
                EXCLUIR CRÉDITOS DE LA TABLA bitacora_bajas
@@ -140,4 +145,3 @@ BEGIN
     ) AS T
     ORDER BY VENCIDA1 ASC;
 END;
-

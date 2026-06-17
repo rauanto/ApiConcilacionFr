@@ -46,6 +46,24 @@ public class ReportesController : ControllerBase
 
         return Ok(ApiResponse<ReporteCarteraResponse>.Success(response, "Reporte de cartera generado con éxito."));
     }
+
+    /// <summary>
+    /// Obtiene el reporte de cartera pasándole el ID de un grupo de cobranza.
+    /// </summary>
+    [HttpGet("carteraPorGrupoCobranza/{grupoCobranzaId}")]
+    [ProducesResponseType(typeof(ApiResponse<ReporteCarteraResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCarteraPorGrupoCobranza(int grupoCobranzaId)
+    {
+        if (grupoCobranzaId <= 0)
+        {
+            return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un ID de grupo de cobranza válido."));
+        }
+
+        var resultado = await _reporteRepo.GetCarteraPorGrupoCobranzaAsync(grupoCobranzaId);
+        var response = new ReporteCarteraResponse(resultado.Count(), resultado);
+
+        return Ok(ApiResponse<ReporteCarteraResponse>.Success(response, "Reporte de cartera generado con éxito."));
+    }
     
     /// <summary>
     /// Obtiene el reporte de cartera de ejecutivos (dependiendo del rol del usuario).

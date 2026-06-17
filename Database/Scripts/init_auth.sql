@@ -2,14 +2,20 @@ CREATE SCHEMA IF NOT EXISTS autentificacion;
 
 USE autentificacion;
 
-CREATE TABLE IF NOT EXISTS Usuarios (
-    Id INT AUTO_INCREMENT PRIMARY KEY,
-    NombreUsuario VARCHAR(50) NOT NULL UNIQUE,
-    Correo VARCHAR(100) NOT NULL UNIQUE,
-    PasswordHash VARCHAR(255) NOT NULL,
-    Rol VARCHAR(20) NOT NULL DEFAULT 'Usuario',
-    Activo BOOLEAN NOT NULL DEFAULT TRUE,
-    FechaCreacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- auto-generated definition
+create table Usuarios
+(
+    Id            int auto_increment
+        primary key,
+    NombreUsuario varchar(50)                          not null,
+    Correo        varchar(100)                         not null,
+    PasswordHash  varchar(255)                         not null,
+    Activo        tinyint(1) default 1                 not null,
+    FechaCreacion timestamp  default CURRENT_TIMESTAMP not null,
+    constraint Correo
+        unique (Correo),
+    constraint NombreUsuario
+        unique (NombreUsuario)
 );
 
 

@@ -30,6 +30,13 @@ public class ReporteRepository : IReporteRepository
         return await connection.QueryAsync<ReporteCartera>(sql, new { Grupos = grupos });
     }
 
+    public async Task<IEnumerable<ReporteCartera>> GetCarteraPorGrupoCobranzaAsync(int grupoCobranzaId)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+        var sql = "CALL sp_ReporteCarteraPorGrupoCobranza(@GrupoCobranzaId);";
+        return await connection.QueryAsync<ReporteCartera>(sql, new { GrupoCobranzaId = grupoCobranzaId });
+    }
+
     public async Task<IEnumerable<ReporteCarteraEjecutivo>> GetCarteraEjecutivosAsync(int usuarioId, string rol)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();

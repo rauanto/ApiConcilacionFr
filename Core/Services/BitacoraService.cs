@@ -14,6 +14,7 @@ public class BitacoraService : IBitacoraService
     private readonly IValidator<UpdateBitacoraRequest> _updateValidator;
     private readonly IFileStorageService _fileStorage;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly INotificationService _notificationService;
 
     public BitacoraService(
         IBitacoraRepository repo,
@@ -21,7 +22,8 @@ public class BitacoraService : IBitacoraService
         IValidator<CreateBitacoraRequest> createValidator,
         IValidator<UpdateBitacoraRequest> updateValidator,
         IFileStorageService fileStorage,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        INotificationService notificationService)
     {
         _repo = repo;
         _archivoRepo = archivoRepo;
@@ -29,6 +31,7 @@ public class BitacoraService : IBitacoraService
         _updateValidator = updateValidator;
         _fileStorage = fileStorage;
         _httpContextAccessor = httpContextAccessor;
+        _notificationService = notificationService;
     }
 
     public async Task<PagedResponse<BitacoraResponse>> GetAllAsync(BitacoraFiltros filtros, PaginationParams paginacion)
@@ -93,6 +96,22 @@ public class BitacoraService : IBitacoraService
         };
 
         var created = await _repo.CreateAsync(entity);
+        
+        try
+        {
+            await _notificationService.NotifyBitacoraCreatedAsync(new BitacoraNotificationPayload(
+                created.Id,
+                created.GestorId,
+                created.TipoGestion ?? string.Empty,
+                created.Resultado ?? string.Empty,
+                created.CreatedAt
+            ));
+        }
+        catch
+        {
+            // Omitimos errores de SignalR para no afectar la creación de la bitácora
+        }
+
         return ToResponse(created, []);
     }
 

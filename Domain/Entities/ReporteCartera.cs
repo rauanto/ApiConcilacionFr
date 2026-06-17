@@ -42,4 +42,5 @@ public class ReporteCartera
     public string? INTERES_BASE { get; set; }
     public string? Mont_int_cobrado { get; set; }
     public string? VENCIDA1 { get; set; }
+    public string? marca_grupo_cobranza { get; set; }
 }

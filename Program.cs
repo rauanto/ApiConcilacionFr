@@ -12,6 +12,7 @@ using ApiConcilacionFr.Infrastructure.Services;
 using Audit.Core;
 using Audit.MySql;
 using Audit.WebApi;
+using ApiConcilacionFr.Infrastructure.Hubs;
 
 
 
@@ -58,6 +59,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
+    builder.Services.AddSignalR();
     // Connection Factory — MySQL
     builder.Services.AddSingleton<IDbConnectionFactory, MySqlConnectionFactory>();
     // Habilitar IHttpContextAccessor
@@ -72,6 +74,8 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
     builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
     builder.Services.AddScoped<IGrupoAsignadoRepository, GrupoAsignadoRepository>();
+    builder.Services.AddScoped<IGrupoCobranzaRepository, GrupoCobranzaRepository>();
+    builder.Services.AddScoped<IGrupoCobranzaCreditoRepository, GrupoCobranzaCreditoRepository>();
     builder.Services.AddScoped<IReporteRepository, ReporteRepository>();
     builder.Services.AddScoped<IBitacoraRepository, BitacoraRepository>();
     builder.Services.AddScoped<IBitacoraArchivoRepository, BitacoraArchivoRepository>();
@@ -85,6 +89,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddScoped<IBitacoraBajasService, BitacoraBajasService>();
     builder.Services.AddScoped<ISocioService, SocioService>();
     builder.Services.AddSingleton<IFileStorageService, LocalFileStorageService>();
+    builder.Services.AddScoped<INotificationService, SignalRNotificationService>();
     
     // PDF Reportes y Http Client
     builder.Services.AddScoped<IReportePdfSimpleService, ReportePdfSimpleService>();
@@ -134,6 +139,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     app.UseAuthorization();
     app.MapControllers();
     app.MapHealthChecks("/health");
+    app.MapHub<NotificationHub>("/hubs/notifications");
 
     app.Run();
 }
