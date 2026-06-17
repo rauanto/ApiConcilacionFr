@@ -45,7 +45,9 @@ public class BitacoraRepository : IBitacoraRepository
         dias_vencidos               AS DiasVencidos,
         cartera_vencida_contable    AS CarteraVencidaContable,
         demanda                     AS Demanda,
-        estatus                     AS Estatus";
+        estatus                     AS Estatus,
+        atendido                    AS Atendido,
+        tipo_antendido              AS TipoAntendido";
 
     private const string WhereFilters = @"
         WHERE (@CreditoId IS NULL OR credito_id = @CreditoId)
@@ -101,13 +103,13 @@ public class BitacoraRepository : IBitacoraRepository
                 fecha_hora_gestion, tipo_gestion, sentido, resultado, duracion_segundos,
                 mensaje_enviado, asunto, respuesta_cliente, promesa_fecha_pago, promesa_monto,
                 observaciones, geolocalizacion_lat, geolocalizacion_lng,
-                fecha_cobro, grupo_id, dias_vencidos, cartera_vencida_contable, demanda, estatus
+                fecha_cobro, grupo_id, dias_vencidos, cartera_vencida_contable, demanda, estatus, atendido, tipo_antendido
             ) VALUES (
                 @AmortizacionId, @CreditoId, @ClienteId, @GestorId, @MedioContactoId,
                 @FechaHoraGestion, @TipoGestion, @Sentido, @Resultado, @DuracionSegundos,
                 @MensajeEnviado, @Asunto, @RespuestaCliente, @PromesaFechaPago, @PromesaMonto,
                 @Observaciones, @GeolocalizacionLat, @GeolocalizacionLng,
-                @FechaCobro, @GrupoId, @DiasVencidos, @CarteraVencidaContable, @Demanda, @Estatus
+                @FechaCobro, @GrupoId, @DiasVencidos, @CarteraVencidaContable, @Demanda, @Estatus, @Atendido, @TipoAntendido
             );
             SELECT LAST_INSERT_ID();";
 
@@ -154,7 +156,9 @@ public class BitacoraRepository : IBitacoraRepository
                         dias_vencidos               = @DiasVencidos,
                         cartera_vencida_contable    = @CarteraVencidaContable,
                         demanda                     = @Demanda,
-                        estatus                     = @Estatus
+                        estatus                     = @Estatus,
+                        atendido                    = @Atendido,
+                        tipo_antendido              = @TipoAntendido
                     WHERE id = @Id";
                 await connection.ExecuteAsync(sql, bitacora);
             });

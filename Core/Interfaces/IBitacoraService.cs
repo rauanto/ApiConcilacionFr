@@ -27,7 +27,9 @@ public record CreateBitacoraRequest(
     string? DiasVencidos,
     string? CarteraVencidaContable,
     string? Demanda,
-    string? Estatus
+    string? Estatus,
+    string? Atendido,
+    string? TipoAntendido
 );
 
 public record UpdateBitacoraRequest(
@@ -54,7 +56,9 @@ public record UpdateBitacoraRequest(
     string? DiasVencidos,
     string? CarteraVencidaContable,
     string? Demanda,
-    string? Estatus
+    string? Estatus,
+    string? Atendido,
+    string? TipoAntendido
 );
 
 public record BitacoraArchivoResponse(
@@ -94,13 +98,15 @@ public record BitacoraResponse(
     string? CarteraVencidaContable,
     string? Demanda,
     string? Estatus,
+    string? Atendido,
+    string? TipoAntendido,
     IReadOnlyList<BitacoraArchivoResponse> Archivos
 );
 
 public class CreateBitacoraValidator : AbstractValidator<CreateBitacoraRequest>
 {
     private static readonly string[] TiposGestion =
-        ["LLAMADA", "SMS", "WHATSAPP", "EMAIL", "VISITA", "CARTA", "BUROFAX"];
+        ["LLAMADA", "SMS", "WHATSAPP", "EMAIL", "VISITA", "CARTA", "BUROFAX", "COMPROMISO"];
 
     private static readonly string[] Sentidos = ["SALIENTE", "ENTRANTE"];
 
@@ -141,7 +147,7 @@ public class CreateBitacoraValidator : AbstractValidator<CreateBitacoraRequest>
 public class UpdateBitacoraValidator : AbstractValidator<UpdateBitacoraRequest>
 {
     private static readonly string[] TiposGestion =
-        ["LLAMADA", "SMS", "WHATSAPP", "EMAIL", "VISITA", "CARTA", "BUROFAX"];
+        ["LLAMADA", "SMS", "WHATSAPP", "EMAIL", "VISITA", "CARTA", "BUROFAX", "COMPROMISO"];
 
     private static readonly string[] Sentidos = ["SALIENTE", "ENTRANTE"];
 

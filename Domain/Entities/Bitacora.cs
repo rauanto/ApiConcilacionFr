@@ -29,4 +29,6 @@ public class Bitacora
     public string? CarteraVencidaContable { get; set; }
     public string? Demanda { get; set; }
     public string? Estatus { get; set; }
+    public string? Atendido { get; set; }
+    public string? TipoAntendido { get; set; }
 }

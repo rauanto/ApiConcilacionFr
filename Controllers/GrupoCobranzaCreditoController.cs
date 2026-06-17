@@ -52,14 +52,13 @@ public class GrupoCobranzaCreditoController : ControllerBase
     }
 
     /// <summary>
-    /// Eliminar la asignación de un crédito a un grupo (DELETE)
+    /// Eliminar la asignación de un crédito a un grupo mediante su CreditoId (DELETE)
     /// </summary>
-    [HttpDelete("{id}")]
+    [HttpDelete("{creditoId}")]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(int creditoId)
     {
-        // Nota: asumiendo que eliminamos por el ID de la tabla intermedia
-        var result = await _grupoCreditoRepo.DeleteAsync(id);
+        var result = await _grupoCreditoRepo.DeleteByCreditoIdAsync(creditoId);
         if (!result)
             return NotFound(ApiResponse<object>.Failure("Asignación no encontrada o no se pudo eliminar."));
 

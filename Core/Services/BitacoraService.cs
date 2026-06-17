@@ -92,6 +92,8 @@ public class BitacoraService : IBitacoraService
             CarteraVencidaContable = request.CarteraVencidaContable,
             Demanda = request.Demanda,
             Estatus = request.Estatus,
+            Atendido = request.Atendido,
+            TipoAntendido = request.TipoAntendido,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -149,6 +151,8 @@ public class BitacoraService : IBitacoraService
         existing.CarteraVencidaContable = request.CarteraVencidaContable;
         existing.Demanda = request.Demanda;
         existing.Estatus = request.Estatus;
+        existing.Atendido = request.Atendido;
+        existing.TipoAntendido = request.TipoAntendido;
 
         var updated = await _repo.UpdateAsync(existing);
         var archivos = await _archivoRepo.GetByBitacoraIdAsync(id);
@@ -246,6 +250,8 @@ public class BitacoraService : IBitacoraService
         b.CarteraVencidaContable,
         b.Demanda,
         b.Estatus,
+        b.Atendido,
+        b.TipoAntendido,
         archivos.Select(ToArchivoResponse).ToList()
     );
 

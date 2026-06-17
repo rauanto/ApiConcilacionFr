@@ -5,6 +5,6 @@ using ApiConcilacionFr.Domain.Entities;
 public interface IGrupoCobranzaCreditoRepository
 {
     Task<bool> CreateAsync(GrupoCobranzaCredito asignacion);
-    Task<bool> DeleteAsync(int id);
+    Task<bool> DeleteByCreditoIdAsync(int creditoId);
     Task<GrupoCobranza?> GetGrupoByCreditoIdAsync(int creditoId);
 }

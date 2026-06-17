@@ -24,11 +24,11 @@ public class GrupoCobranzaCreditoRepository : IGrupoCobranzaCreditoRepository
         return rows > 0;
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteByCreditoIdAsync(int creditoId)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        const string sql = "DELETE FROM bitacora.grupo_cobranza_credito WHERE id = @Id";
-        var rows = await connection.ExecuteAsync(sql, new { Id = id });
+        const string sql = "DELETE FROM bitacora.grupo_cobranza_credito WHERE credito_id = @CreditoId";
+        var rows = await connection.ExecuteAsync(sql, new { CreditoId = creditoId });
         return rows > 0;
     }
 
