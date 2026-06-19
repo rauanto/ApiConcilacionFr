@@ -8,6 +8,7 @@ public class ReporteLiquidadosgrupo
     public DateTime PQ_FECHA_LIQUIDACION { get; set; }
     public int total_clientes { get; set; }
     public int total_prestamos { get; set; }
-    public double monto_liquidado { get; set; }
+    public double monto_credito { get; set; }
     public string? ejecutivo_asignado { get; set; }
+    public double? monto_cobrado_liquidado { get; set; }
 }
