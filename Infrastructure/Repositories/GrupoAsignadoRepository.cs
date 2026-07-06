@@ -78,12 +78,22 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
     /// <returns>True si la creación fue exitosa, de lo contrario false.</returns>
     public async Task<bool> CreateAsync(GrupoAsignado grupo)
     {
-        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = @"
-            INSERT INTO autentificacion.grupo_asignado (S_GRUPO, nombre_grupo, usuario_id) 
-            VALUES (@S_GRUPO, @nombre_grupo, @usuario_id)";
-            
-        var rows = await connection.ExecuteAsync(sql, grupo);
+        int rows = 0;
+        await _auditHelper.ExecuteWithAuditAsync(
+            "GrupoAsignado",
+            grupo.S_GRUPO,
+            "CREATE",
+            null,
+            grupo,
+            async () =>
+            {
+                using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+                var sql = @"
+                    INSERT INTO autentificacion.grupo_asignado (S_GRUPO, nombre_grupo, usuario_id) 
+                    VALUES (@S_GRUPO, @nombre_grupo, @usuario_id)";
+                    
+                rows = await connection.ExecuteAsync(sql, grupo);
+            });
         return rows > 0;
     }
 
@@ -126,13 +136,26 @@ public class GrupoAsignadoRepository : IGrupoAsignadoRepository
     /// <returns>True si la actualización fue exitosa, de lo contrario false.</returns>
     public async Task<bool> PatchNombreAsync(string sGrupo, string nuevoNombre)
     {
-        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = @"
-            UPDATE autentificacion.grupo_asignado 
-            SET nombre_grupo = @NombreGrupo 
-            WHERE S_GRUPO = @SGrupo";
+        var estadoAnterior = await GetByIdAsync(sGrupo);
+        int rows = 0;
 
-        var rows = await connection.ExecuteAsync(sql, new { NombreGrupo = nuevoNombre, SGrupo = sGrupo });
+        await _auditHelper.ExecuteWithAuditAsync(
+            "GrupoAsignado",
+            sGrupo,
+            "PATCH",
+            estadoAnterior,
+            new { NombreGrupo = nuevoNombre },
+            async () =>
+            {
+                using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+                var sql = @"
+                    UPDATE autentificacion.grupo_asignado 
+                    SET nombre_grupo = @NombreGrupo 
+                    WHERE S_GRUPO = @SGrupo";
+
+                rows = await connection.ExecuteAsync(sql, new { NombreGrupo = nuevoNombre, SGrupo = sGrupo });
+            });
+            
         return rows > 0;
     }
 

@@ -2,6 +2,7 @@
 using ApiConcilacionFr.Core.Interfaces;
 using ApiConcilacionFr.Domain.Entities;
 using ApiConcilacionFr.Infrastructure.Database;
+using ApiConcilacionFr.Core.Services;
 using Dapper;
 
 namespace ApiConcilacionFr.Infrastructure.Repositories;
@@ -9,10 +10,12 @@ namespace ApiConcilacionFr.Infrastructure.Repositories;
 public class UsuarioRepository : IUsuarioRepository
 {
     private readonly IDbConnectionFactory _connectionFactory;
+    private readonly IAuditHelper _auditHelper;
 
-    public UsuarioRepository(IDbConnectionFactory connectionFactory)
+    public UsuarioRepository(IDbConnectionFactory connectionFactory, IAuditHelper auditHelper)
     {
         _connectionFactory = connectionFactory;
+        _auditHelper = auditHelper;
     }
 
     public async Task<Usuario?> GetByIdAsync(int id)
@@ -49,28 +52,52 @@ public class UsuarioRepository : IUsuarioRepository
 
     public async Task<int> CreateAsync(Usuario usuario)
     {
-        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = @"
-            INSERT INTO autentificacion.Usuarios 
-            (NombreUsuario, Correo, PasswordHash, Activo, FechaCreacion) 
-            VALUES (@NombreUsuario, @Correo, @PasswordHash, @Activo, @FechaCreacion);
-            SELECT LAST_INSERT_ID();";
+        int newId = 0;
+        await _auditHelper.ExecuteWithAuditAsync(
+            "Usuario",
+            "0",
+            "CREATE",
+            null,
+            usuario,
+            async () =>
+            {
+                using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+                var sql = @"
+                    INSERT INTO autentificacion.Usuarios 
+                    (NombreUsuario, Correo, PasswordHash, Activo, FechaCreacion) 
+                    VALUES (@NombreUsuario, @Correo, @PasswordHash, @Activo, @FechaCreacion);
+                    SELECT LAST_INSERT_ID();";
 
-        return await connection.ExecuteScalarAsync<int>(sql, usuario);
+                newId = await connection.ExecuteScalarAsync<int>(sql, usuario);
+            });
+        return newId;
     }
 
     public async Task<bool> UpdateAsync(Usuario usuario)
     {
-        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        var sql = @"
-            UPDATE autentificacion.Usuarios 
-            SET NombreUsuario = @NombreUsuario, 
-                Correo = @Correo, 
-                PasswordHash = @PasswordHash, 
-                Activo = @Activo
-            WHERE Id = @Id";
+        var estadoAnterior = await GetByIdAsync(usuario.Id);
+        int result = 0;
 
-        var result = await connection.ExecuteAsync(sql, usuario);
+        await _auditHelper.ExecuteWithAuditAsync(
+            "Usuario",
+            usuario.Id.ToString(),
+            "UPDATE",
+            estadoAnterior,
+            usuario,
+            async () =>
+            {
+                using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+                var sql = @"
+                    UPDATE autentificacion.Usuarios 
+                    SET NombreUsuario = @NombreUsuario, 
+                        Correo = @Correo, 
+                        PasswordHash = @PasswordHash, 
+                        Activo = @Activo
+                    WHERE Id = @Id";
+
+                result = await connection.ExecuteAsync(sql, usuario);
+            });
+
         return result > 0;
     }
 

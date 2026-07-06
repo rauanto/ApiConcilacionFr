@@ -96,24 +96,34 @@ public class BitacoraRepository : IBitacoraRepository
 
     public async Task<Bitacora> CreateAsync(Bitacora bitacora)
     {
-        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        const string sql = @"
-            INSERT INTO bitacora.bitacora_gestion (
-                amortizacion_id, credito_id, cliente_id, gestor_id, medio_contacto_id,
-                fecha_hora_gestion, tipo_gestion, sentido, resultado, duracion_segundos,
-                mensaje_enviado, asunto, respuesta_cliente, promesa_fecha_pago, promesa_monto,
-                observaciones, geolocalizacion_lat, geolocalizacion_lng,
-                fecha_cobro, grupo_id, dias_vencidos, cartera_vencida_contable, demanda, estatus, atendido, tipo_antendido
-            ) VALUES (
-                @AmortizacionId, @CreditoId, @ClienteId, @GestorId, @MedioContactoId,
-                @FechaHoraGestion, @TipoGestion, @Sentido, @Resultado, @DuracionSegundos,
-                @MensajeEnviado, @Asunto, @RespuestaCliente, @PromesaFechaPago, @PromesaMonto,
-                @Observaciones, @GeolocalizacionLat, @GeolocalizacionLng,
-                @FechaCobro, @GrupoId, @DiasVencidos, @CarteraVencidaContable, @Demanda, @Estatus, @Atendido, @TipoAntendido
-            );
-            SELECT LAST_INSERT_ID();";
+        int newId = 0;
+        await _auditHelper.ExecuteWithAuditAsync(
+            "Bitacora",
+            "0",
+            "CREATE",
+            null,
+            bitacora,
+            async () =>
+            {
+                using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+                const string sql = @"
+                    INSERT INTO bitacora.bitacora_gestion (
+                        amortizacion_id, credito_id, cliente_id, gestor_id, medio_contacto_id,
+                        fecha_hora_gestion, tipo_gestion, sentido, resultado, duracion_segundos,
+                        mensaje_enviado, asunto, respuesta_cliente, promesa_fecha_pago, promesa_monto,
+                        observaciones, geolocalizacion_lat, geolocalizacion_lng,
+                        fecha_cobro, grupo_id, dias_vencidos, cartera_vencida_contable, demanda, estatus, atendido, tipo_antendido
+                    ) VALUES (
+                        @AmortizacionId, @CreditoId, @ClienteId, @GestorId, @MedioContactoId,
+                        @FechaHoraGestion, @TipoGestion, @Sentido, @Resultado, @DuracionSegundos,
+                        @MensajeEnviado, @Asunto, @RespuestaCliente, @PromesaFechaPago, @PromesaMonto,
+                        @Observaciones, @GeolocalizacionLat, @GeolocalizacionLng,
+                        @FechaCobro, @GrupoId, @DiasVencidos, @CarteraVencidaContable, @Demanda, @Estatus, @Atendido, @TipoAntendido
+                    );
+                    SELECT LAST_INSERT_ID();";
 
-        var newId = await connection.ExecuteScalarAsync<int>(sql, bitacora);
+                newId = await connection.ExecuteScalarAsync<int>(sql, bitacora);
+            });
         return (await GetByIdAsync(newId))!;
     }
 

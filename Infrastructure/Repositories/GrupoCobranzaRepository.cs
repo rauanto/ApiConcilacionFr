@@ -44,11 +44,21 @@ public class GrupoCobranzaRepository : IGrupoCobranzaRepository
 
     public async Task<bool> CreateAsync(GrupoCobranza grupo)
     {
-        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        const string sql = @"
-            INSERT INTO bitacora.grupo_cobranza (nombre, usuario_creo_id, descripcion, fecha_cobranza) 
-            VALUES (@Nombre, @UsuarioCreoId, @Descripcion, @FechaCobranza)";
-        var rows = await connection.ExecuteAsync(sql, grupo);
+        int rows = 0;
+        await _auditHelper.ExecuteWithAuditAsync(
+            "GrupoCobranza",
+            "0",
+            "CREATE",
+            null,
+            grupo,
+            async () =>
+            {
+                using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+                const string sql = @"
+                    INSERT INTO bitacora.grupo_cobranza (nombre, usuario_creo_id, descripcion, fecha_cobranza) 
+                    VALUES (@Nombre, @UsuarioCreoId, @Descripcion, @FechaCobranza)";
+                rows = await connection.ExecuteAsync(sql, grupo);
+            });
         return rows > 0;
     }
 
@@ -81,12 +91,25 @@ public class GrupoCobranzaRepository : IGrupoCobranzaRepository
 
     public async Task<bool> PatchDescripcionAsync(int id, string nuevaDescripcion)
     {
-        using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        const string sql = @"
-            UPDATE bitacora.grupo_cobranza 
-            SET descripcion = @Descripcion 
-            WHERE id = @Id";
-        var rows = await connection.ExecuteAsync(sql, new { Descripcion = nuevaDescripcion, Id = id });
+        var estadoAnterior = await GetByIdAsync(id);
+        int rows = 0;
+
+        await _auditHelper.ExecuteWithAuditAsync(
+            "GrupoCobranza",
+            id.ToString(),
+            "PATCH",
+            estadoAnterior,
+            new { Descripcion = nuevaDescripcion },
+            async () =>
+            {
+                using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+                const string sql = @"
+                    UPDATE bitacora.grupo_cobranza 
+                    SET descripcion = @Descripcion 
+                    WHERE id = @Id";
+                rows = await connection.ExecuteAsync(sql, new { Descripcion = nuevaDescripcion, Id = id });
+            });
+            
         return rows > 0;
     }
 
