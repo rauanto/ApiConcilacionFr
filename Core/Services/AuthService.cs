@@ -116,6 +116,19 @@ public class AuthService : IAuthService
         return await _usuarioRepository.UpdateAsync(usuario);
     }
 
+    public async Task<bool> UpdatePasswordAsync(int userId, UpdatePasswordRequest request)
+    {
+        var usuario = await _usuarioRepository.GetByIdAsync(userId);
+        if (usuario == null)
+            throw new NotFoundException("Usuario no encontrado.");
+
+        if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, usuario.PasswordHash))
+            throw new UnauthorizedException("La contraseña actual no coincide.");
+
+        usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        return await _usuarioRepository.UpdateAsync(usuario);
+    }
+
     public async Task<UsuarioProfile> GetProfileAsync(int userId)
     {
         var usuario = await _usuarioRepository.GetByIdAsync(userId);

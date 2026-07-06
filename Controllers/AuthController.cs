@@ -53,6 +53,32 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// Actualizar la contraseña del usuario autenticado comprobando su contraseña actual.
+    /// </summary>
+    [HttpPut("actualizar-password")]
+    [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> ActualizarPassword([FromBody] UpdatePasswordRequest request)
+    {
+        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                           ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+
+        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            return Unauthorized(ApiResponse<object>.Failure("Token inválido o mal formado."));
+
+        try
+        {
+            await _authService.UpdatePasswordAsync(userId, request);
+            return Ok(ApiResponse<object>.Success(null, "La contraseña se cambio correctamente"));
+        }
+        catch (UnauthorizedException ex)
+        {
+            return Unauthorized(ApiResponse<object>.Failure(ex.Message));
+        }
+    }
+
+    /// <summary>
     /// Utilidad temporal para generar un hash BCrypt para una contraseña (para crear usuarios en BD o debugear).
     /// </summary>
     [HttpGet("hash/{password}")]

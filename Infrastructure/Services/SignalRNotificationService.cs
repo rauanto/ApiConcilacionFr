@@ -20,4 +20,9 @@ public class SignalRNotificationService : INotificationService
         // (Podría enviarse solo a ciertos grupos, como administradores o gestores específicos)
         await _hubContext.Clients.All.ReceiveBitacoraNotification(payload);
     }
+
+    public async Task SendNotificationAsync(string message)
+    {
+        await _hubContext.Clients.All.ReceiveNotification(message);
+    }
 }

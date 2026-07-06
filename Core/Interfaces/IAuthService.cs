@@ -10,6 +10,7 @@ public record LogoutRequest(string RefreshToken);
 public record AuthResponse(string Token, string RefreshToken, UsuarioProfile Profile);
 public record UsuarioProfile(int Id, string NombreUsuario, string Correo, IEnumerable<string> Roles, IEnumerable<string> Permisos);
 public record ChangePasswordRequest(string UserId, string NewPassword);
+public record UpdatePasswordRequest(string CurrentPassword, string NewPassword);
 
 public interface IAuthService
 {
@@ -18,6 +19,7 @@ public interface IAuthService
     Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequest request);
     Task LogoutAsync(LogoutRequest request);
     Task<bool> ChangePasswordAsync(ChangePasswordRequest request);
+    Task<bool> UpdatePasswordAsync(int userId, UpdatePasswordRequest request);
     Task<UsuarioProfile> GetProfileAsync(int userId);
     Task<IEnumerable<UsuarioBasic>> GetUsuariosAsync();
 }

@@ -131,7 +131,7 @@ public class BitacoraRepository : IBitacoraRepository
             {
                 using var connection = await _connectionFactory.CreateOpenConnectionAsync();
                 const string sql = @"
-                    UPDATE bitacora_gestion SET
+                    UPDATE bitacora.bitacora_gestion SET
                         amortizacion_id     = @AmortizacionId,
                         credito_id          = @CreditoId,
                         cliente_id          = @ClienteId,

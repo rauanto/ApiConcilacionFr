@@ -82,6 +82,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddScoped<IBitacoraBajasRepository, BitacoraBajasRepository>();
     builder.Services.AddScoped<ISocioRepository, SocioRepository>();
     builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+    builder.Services.AddScoped<ISolicitudBajaRepository, SolicitudBajaRepository>();
 
     // Servicios de negocio
     // builder.Services.AddScoped<IProductoService, ProductoService>();
@@ -92,6 +93,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddSingleton<IFileStorageService, LocalFileStorageService>();
     builder.Services.AddScoped<INotificationService, SignalRNotificationService>();
     builder.Services.AddScoped<IRolesService, RolesService>();
+    builder.Services.AddScoped<ISolicitudBajaService, SolicitudBajaService>();
     
     // PDF Reportes y Http Client
     builder.Services.AddScoped<IReportePdfSimpleService, ReportePdfSimpleService>();

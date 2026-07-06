@@ -5,4 +5,5 @@ namespace ApiConcilacionFr.Core.Interfaces;
 public interface INotificationService
 {
     Task NotifyBitacoraCreatedAsync(BitacoraNotificationPayload payload);
+    Task SendNotificationAsync(string message);
 }
