@@ -134,6 +134,9 @@ public class AmortizacionSimpleDocument : IDocument
                 columns.RelativeColumn();   // IVA
                 columns.RelativeColumn();   // TOTAL
                 columns.RelativeColumn();   // SALDO INSOLUTO
+                columns.RelativeColumn();   // TOTAL
+                columns.RelativeColumn();   // SALDO INSOLUTO
+
                 columns.ConstantColumn(55); // ESTADO (Ajustado a la píldora)
             });
 
@@ -151,6 +154,8 @@ public class AmortizacionSimpleDocument : IDocument
                 header.Cell().Element(HeaderStyle).AlignRight().Text("IVA").FontSize(8).FontColor(Colors.Grey.Darken3).SemiBold();
                 header.Cell().Element(HeaderStyle).AlignRight().Text("TOTAL").FontSize(8).FontColor(Colors.Grey.Darken3).SemiBold();
                 header.Cell().Element(HeaderStyle).AlignRight().Text("SALDO INSOLUTO").FontSize(8).FontColor(Colors.Grey.Darken3).SemiBold();
+                header.Cell().Element(HeaderStyle).AlignRight().Text("ABONO").FontSize(8).FontColor(Colors.Grey.Darken3).SemiBold();
+                header.Cell().Element(HeaderStyle).AlignRight().Text("SAL. PEND.").FontSize(8).FontColor(Colors.Grey.Darken3).SemiBold();
                 header.Cell().Element(HeaderStyle).AlignCenter().Text("ESTADO").FontSize(8).FontColor(Colors.Grey.Darken3).SemiBold();
             });
 
@@ -171,7 +176,8 @@ public class AmortizacionSimpleDocument : IDocument
                 table.Cell().Element(CellStyle).AlignRight().Text(amortizacion.IVA ?? "-").FontSize(8);
                 table.Cell().Element(CellStyle).AlignRight().Text(amortizacion.TOTAL ?? "-").FontSize(8).SemiBold(); // Remarcamos el total a pagar
                 table.Cell().Element(CellStyle).AlignRight().Text(amortizacion.SALDO_INSOLUTO ?? "-").FontSize(8).FontColor(Colors.Grey.Darken2);
-
+                table.Cell().Element(CellStyle).AlignRight().Text(amortizacion.ABONO ?? "-").FontSize(8).SemiBold(); // Remarcamos el total a pagar
+                table.Cell().Element(CellStyle).AlignRight().Text(amortizacion.SALDO_PENDIENTE ?? "-").FontSize(8).FontColor(Colors.Grey.Darken2);
                 // Estado Pill centrado
                 table.Cell().Element(CellStyle).AlignCenter().Element(c => ComposeEstadoPill(c, amortizacion.Estado));
 
