@@ -28,6 +28,9 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
+    // Requerido por ExcelDataReader para soportar codificaciones antiguas si el Excel las usa
+    System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
     var builder = WebApplication.CreateBuilder(args);
 // Registrar el helper
 builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
@@ -83,6 +86,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddScoped<ISocioRepository, SocioRepository>();
     builder.Services.AddScoped<IRolesRepository, RolesRepository>();
     builder.Services.AddScoped<ISolicitudBajaRepository, SolicitudBajaRepository>();
+    builder.Services.AddScoped<IProvisionRepository, ProvisionRepository>();
 
     // Servicios de negocio
     // builder.Services.AddScoped<IProductoService, ProductoService>();
@@ -94,6 +98,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddScoped<INotificationService, SignalRNotificationService>();
     builder.Services.AddScoped<IRolesService, RolesService>();
     builder.Services.AddScoped<ISolicitudBajaService, SolicitudBajaService>();
+    builder.Services.AddScoped<IProvisionService, ProvisionService>();
     
     // PDF Reportes y Http Client
     builder.Services.AddScoped<IReportePdfSimpleService, ReportePdfSimpleService>();

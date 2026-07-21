@@ -13,7 +13,6 @@ public class Amortizacion
     public string? IVA { get; set; }
     public string? TOTAL { get; set; }
     public string? Estado { get; set; }
-    
     public string? ABONO { get; set; }
     public string? SALDO_PENDIENTE { get; set; }
 }

@@ -9,8 +9,11 @@
   <ItemGroup>
     <PackageReference Include="Audit.NET.MySql" Version="32.0.0" />
     <PackageReference Include="Audit.WebApi.Core" Version="32.0.0" />
+    <PackageReference Include="ClosedXML" Version="0.102.2" />
     <PackageReference Include="Dapper" Version="2.1.72" />
         <PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
+        <PackageReference Include="ExcelDataReader" Version="3.7.0" />
+        <PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
