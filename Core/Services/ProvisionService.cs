@@ -253,7 +253,7 @@ namespace ApiConcilacionFr.Core.Services
         public async Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteProvisionesAsync(ReporteProvisionRequest request)
         {
             string listaPrestamos = request?.ListaPrestamos != null ? string.Join(",", request.ListaPrestamos) : "";
-            return await _provisionRepository.ObtenerReporteProvisionesAsync(listaPrestamos);
+            return await _provisionRepository.ObtenerReporteProvisionesAsync(listaPrestamos, request?.FechaInicio, request?.FechaFin);
         }
     }
 }

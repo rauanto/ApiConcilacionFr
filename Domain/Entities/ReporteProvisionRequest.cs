@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ApiConcilacionFr.Domain.Entities
@@ -8,5 +9,8 @@ namespace ApiConcilacionFr.Domain.Entities
         // y luego en el backend la unimos con string.Join(",", ListaPrestamos).
         // Sin embargo, si el usuario manda directamente un string delimitado por comas, usaremos un string.
         public List<string> ListaPrestamos { get; set; } = new List<string>();
+        
+        public DateTime? FechaInicio { get; set; }
+        public DateTime? FechaFin { get; set; }
     }
 }

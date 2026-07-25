@@ -32,6 +32,7 @@ try
     System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
     var builder = WebApplication.CreateBuilder(args);
+    Dapper.SqlMapper.AddTypeHandler(new ApiConcilacionFr.Infrastructure.Database.SqlDateOnlyTypeHandler());
 // Registrar el helper
 builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
 
