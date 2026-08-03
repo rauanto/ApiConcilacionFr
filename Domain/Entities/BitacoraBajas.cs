@@ -26,4 +26,5 @@ public class BitacoraBajas
     public int? Baja { get; set; }
     public string NombreCliente { get; set; } = string.Empty;
     public string? Sindicato { get; set; } = string.Empty;
+    public DateOnly? FechaRealBaja { get; set; }
 }

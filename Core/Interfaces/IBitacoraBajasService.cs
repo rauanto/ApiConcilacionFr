@@ -25,12 +25,14 @@ public record CreateBitacoraBajasRequest(
     string? Obervaciones,
     string NombreCliente,
     string? Sindicato,
-    int Baja
+    int Baja,
+    DateOnly? FechaRealBaja
 );
 
 public record UpdateBitacoraBajaRequest(
     int Baja,
-    string? Obervaciones
+    string? Obervaciones,
+    DateOnly? FechaRealBaja
 );
 
 public record BitacoraBajasResponse(
@@ -57,7 +59,8 @@ public record BitacoraBajasResponse(
     string? Obervaciones,
     int? Baja,
     string NombreCliente,
-    string? Sindicato
+    string? Sindicato,
+    DateOnly? FechaRealBaja
 );
 
 public class CreateBitacoraBajasValidator : AbstractValidator<CreateBitacoraBajasRequest>

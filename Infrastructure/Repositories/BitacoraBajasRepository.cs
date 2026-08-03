@@ -75,6 +75,7 @@ public class BitacoraBajasRepository : IBitacoraBajasRepository
                 parameters.Add("p_nombre_cliente", bitacoraBaja.NombreCliente);
                 parameters.Add("p_sindicato", bitacoraBaja.Sindicato);
                 parameters.Add("p_baja", bitacoraBaja.Baja);
+                parameters.Add("p_fecha_real_baja", bitacoraBaja.FechaRealBaja);
 
                 id = await connection.QuerySingleAsync<long>(
                     "bitacora.sp_insertar_bitacora_baja",
@@ -92,7 +93,7 @@ public class BitacoraBajasRepository : IBitacoraBajasRepository
         return await connection.QuerySingleOrDefaultAsync<BitacoraBajas>(sql, new { Id = id });
     }
 
-    public async Task<BitacoraBajas?> UpdateAsync(long creditoId, int baja, string? obervaciones)
+    public async Task<BitacoraBajas?> UpdateAsync(long creditoId, int baja, string? obervaciones, DateOnly? fechaRealBaja)
     {
         var estadoAnterior = await GetByCreditoIdAsync(creditoId);
 
@@ -103,7 +104,7 @@ public class BitacoraBajasRepository : IBitacoraBajasRepository
             creditoId.ToString(),
             "UPDATE",
             estadoAnterior,
-            new { Baja = baja, Obervaciones = obervaciones },
+            new { Baja = baja, Obervaciones = obervaciones, FechaRealBaja = fechaRealBaja },
             async () =>
             {
                 using var connection = _connectionFactory.CreateConnection();
@@ -112,6 +113,7 @@ public class BitacoraBajasRepository : IBitacoraBajasRepository
                 parameters.Add("p_credito_id", creditoId);
                 parameters.Add("p_baja", baja);
                 parameters.Add("p_obervaciones", obervaciones);
+                parameters.Add("p_fecha_real_baja", fechaRealBaja);
 
                 using var multi = await connection.QueryMultipleAsync(
                     "bitacora.sp_actualizar_bitacora_baja",

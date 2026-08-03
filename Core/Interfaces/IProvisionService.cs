@@ -9,5 +9,9 @@ namespace ApiConcilacionFr.Core.Interfaces
     {
         byte[] ProcesarReporteProvision(IFormFile file);
         Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteProvisionesAsync(ReporteProvisionRequest request);
+        Task<ReporteProvisionFiltrosDto> ObtenerFiltrosReporteProvisionesAsync(ReporteProvisionRequest request);
+        Task<int> GenerarYGuardarReporteAsync(ReporteGuardadoRequest request);
+        Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteGuardadoAsync(int reporteId);
+        Task<IEnumerable<ReporteProvisionGuardadoDto>> ListarReportesGuardadosAsync();
     }
 }

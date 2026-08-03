@@ -5,6 +5,7 @@ using ExcelDataReader;
 using Microsoft.AspNetCore.Http;
 using System.Data;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace ApiConcilacionFr.Core.Services
 {
@@ -254,6 +255,93 @@ namespace ApiConcilacionFr.Core.Services
         {
             string listaPrestamos = request?.ListaPrestamos != null ? string.Join(",", request.ListaPrestamos) : "";
             return await _provisionRepository.ObtenerReporteProvisionesAsync(listaPrestamos, request?.FechaInicio, request?.FechaFin);
+        }
+
+        public async Task<ReporteProvisionFiltrosDto> ObtenerFiltrosReporteProvisionesAsync(ReporteProvisionRequest request)
+        {
+            var datos = (await ObtenerReporteProvisionesAsync(request)).ToList();
+            var filtros = new ReporteProvisionFiltrosDto();
+
+            if (!datos.Any()) return filtros;
+
+            filtros.S_GRUPO.Valores = datos.Where(x => !string.IsNullOrEmpty(x.S_GRUPO)).Select(x => x.S_GRUPO!).Distinct().OrderBy(x => x).ToList();
+            filtros.GRUPO.Valores = datos.Where(x => !string.IsNullOrEmpty(x.GRUPO)).Select(x => x.GRUPO!).Distinct().OrderBy(x => x).ToList();
+            filtros.PAGO_SOSTENIDO.Valores = datos.Where(x => !string.IsNullOrEmpty(x.PAGO_SOSTENIDO)).Select(x => x.PAGO_SOSTENIDO!).Distinct().OrderBy(x => x).ToList();
+
+            filtros.CREDITO_OTORGADO.Min = datos.Where(x => x.CREDITO_OTORGADO.HasValue).Min(x => x.CREDITO_OTORGADO);
+            filtros.CREDITO_OTORGADO.Max = datos.Where(x => x.CREDITO_OTORGADO.HasValue).Max(x => x.CREDITO_OTORGADO);
+
+            filtros.CREDITO_LIQUIDADO.Min = datos.Where(x => x.CREDITO_LIQUIDADO.HasValue).Min(x => x.CREDITO_LIQUIDADO);
+            filtros.CREDITO_LIQUIDADO.Max = datos.Where(x => x.CREDITO_LIQUIDADO.HasValue).Max(x => x.CREDITO_LIQUIDADO);
+
+            filtros.AMORTIZA_INICIO.Min = datos.Where(x => x.AMORTIZA_INICIO.HasValue).Min(x => x.AMORTIZA_INICIO);
+            filtros.AMORTIZA_INICIO.Max = datos.Where(x => x.AMORTIZA_INICIO.HasValue).Max(x => x.AMORTIZA_INICIO);
+
+            filtros.AMORTIZA_VENCIMIENTO.Min = datos.Where(x => x.AMORTIZA_VENCIMIENTO.HasValue).Min(x => x.AMORTIZA_VENCIMIENTO);
+            filtros.AMORTIZA_VENCIMIENTO.Max = datos.Where(x => x.AMORTIZA_VENCIMIENTO.HasValue).Max(x => x.AMORTIZA_VENCIMIENTO);
+
+            filtros.ULTIMO_PAGO.Min = datos.Where(x => x.ULTIMO_PAGO.HasValue).Min(x => x.ULTIMO_PAGO);
+            filtros.ULTIMO_PAGO.Max = datos.Where(x => x.ULTIMO_PAGO.HasValue).Max(x => x.ULTIMO_PAGO);
+
+            decimal ParseDecimal(string? val) => decimal.TryParse(val, out var d) ? d : 0;
+
+            var prestamosNum = datos.Select(x => ParseDecimal(x.PRESTAMO)).Where(x => x > 0).ToList();
+            if (prestamosNum.Any())
+            {
+                filtros.PRESTAMO.Min = prestamosNum.Min();
+                filtros.PRESTAMO.Max = prestamosNum.Max();
+            }
+
+            var sClaveNum = datos.Select(x => ParseDecimal(x.S_CLAVE)).Where(x => x > 0).ToList();
+            if (sClaveNum.Any())
+            {
+                filtros.S_CLAVE.Min = sClaveNum.Min();
+                filtros.S_CLAVE.Max = sClaveNum.Max();
+            }
+
+            filtros.AMORTIZA_NUMERO.Min = datos.Where(x => x.AMORTIZA_NUMERO.HasValue).Min(x => x.AMORTIZA_NUMERO);
+            filtros.AMORTIZA_NUMERO.Max = datos.Where(x => x.AMORTIZA_NUMERO.HasValue).Max(x => x.AMORTIZA_NUMERO);
+
+            filtros.PRIMERA_AMORTIZACION.Min = datos.Where(x => x.PRIMERA_AMORTIZACION.HasValue).Min(x => x.PRIMERA_AMORTIZACION);
+            filtros.PRIMERA_AMORTIZACION.Max = datos.Where(x => x.PRIMERA_AMORTIZACION.HasValue).Max(x => x.PRIMERA_AMORTIZACION);
+
+            filtros.IMPORTE_AMORTIZACION.Min = datos.Where(x => x.IMPORTE_AMORTIZACION.HasValue).Min(x => x.IMPORTE_AMORTIZACION);
+            filtros.IMPORTE_AMORTIZACION.Max = datos.Where(x => x.IMPORTE_AMORTIZACION.HasValue).Max(x => x.IMPORTE_AMORTIZACION);
+
+            filtros.ABONADO.Min = datos.Where(x => x.ABONADO.HasValue).Min(x => x.ABONADO);
+            filtros.ABONADO.Max = datos.Where(x => x.ABONADO.HasValue).Max(x => x.ABONADO);
+
+            filtros.SALDO_AMORTIZACION.Min = datos.Where(x => x.SALDO_AMORTIZACION.HasValue).Min(x => x.SALDO_AMORTIZACION);
+            filtros.SALDO_AMORTIZACION.Max = datos.Where(x => x.SALDO_AMORTIZACION.HasValue).Max(x => x.SALDO_AMORTIZACION);
+
+            filtros.DIAS_ATRASO.Min = datos.Where(x => x.DIAS_ATRASO.HasValue).Min(x => x.DIAS_ATRASO);
+            filtros.DIAS_ATRASO.Max = datos.Where(x => x.DIAS_ATRASO.HasValue).Max(x => x.DIAS_ATRASO);
+
+            filtros.MESES_ATRASO.Min = datos.Where(x => x.MESES_ATRASO.HasValue).Min(x => x.MESES_ATRASO);
+            filtros.MESES_ATRASO.Max = datos.Where(x => x.MESES_ATRASO.HasValue).Max(x => x.MESES_ATRASO);
+
+            filtros.DIAS_SIN_PAGAR.Min = datos.Where(x => x.DIAS_SIN_PAGAR.HasValue).Min(x => x.DIAS_SIN_PAGAR);
+            filtros.DIAS_SIN_PAGAR.Max = datos.Where(x => x.DIAS_SIN_PAGAR.HasValue).Max(x => x.DIAS_SIN_PAGAR);
+
+            return filtros;
+        }
+
+        public async Task<int> GenerarYGuardarReporteAsync(ReporteGuardadoRequest request)
+        {
+            var detalles = await ObtenerReporteProvisionesAsync(request);
+            string listaPrestamosStr = request?.ListaPrestamos != null ? string.Join(",", request.ListaPrestamos) : "";
+            
+            return await _provisionRepository.GuardarReporteAsync(request, listaPrestamosStr, detalles);
+        }
+
+        public async Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteGuardadoAsync(int reporteId)
+        {
+            return await _provisionRepository.ObtenerReporteGuardadoAsync(reporteId);
+        }
+
+        public async Task<IEnumerable<ReporteProvisionGuardadoDto>> ListarReportesGuardadosAsync()
+        {
+            return await _provisionRepository.ListarReportesGuardadosAsync();
         }
     }
 }

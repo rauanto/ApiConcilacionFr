@@ -59,6 +59,7 @@ public class BitacoraBajasService : IBitacoraBajasService
             Obervaciones = request.Obervaciones,
             GestorId = gestorId,
             Baja = request.Baja,
+            FechaRealBaja = request.FechaRealBaja,
             CreatedAt = DateTime.UtcNow,
             NombreCliente = request.NombreCliente,
             Sindicato = request.Sindicato
@@ -75,7 +76,7 @@ public class BitacoraBajasService : IBitacoraBajasService
 
     public async Task<BitacoraBajasResponse> UpdateAsync(long creditoId, UpdateBitacoraBajaRequest request)
     {
-        var updated = await _repository.UpdateAsync(creditoId, request.Baja, request.Obervaciones);
+        var updated = await _repository.UpdateAsync(creditoId, request.Baja, request.Obervaciones, request.FechaRealBaja);
 
         if (updated == null)
             throw new NotFoundException($"No se encontró ningún registro con CreditoId {creditoId}.");
@@ -109,7 +110,8 @@ public class BitacoraBajasService : IBitacoraBajasService
             entidad.Obervaciones,
             entidad.Baja,
             entidad.NombreCliente,
-            entidad.Sindicato
+            entidad.Sindicato,
+            entidad.FechaRealBaja
         );
     }
 }
