@@ -64,6 +64,11 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Services.AddSignalR();
+    builder.Services.AddMemoryCache();
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.EnableForHttps = true;
+    });
     // Connection Factory — MySQL
     builder.Services.AddSingleton<IDbConnectionFactory, MySqlConnectionFactory>();
     // Habilitar IHttpContextAccessor
@@ -131,6 +136,8 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
 
     // Middleware de errores SIEMPRE al inicio del pipeline
     app.UseMiddleware<ErrorHandlingMiddleware>();
+
+    app.UseResponseCompression();
 
     app.UseHttpsRedirection();
     app.UseCors("AllowAll");

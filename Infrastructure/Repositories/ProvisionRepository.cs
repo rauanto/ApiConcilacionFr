@@ -93,10 +93,10 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
             }
         }
 
-        public async Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteGuardadoAsync(int reporteId)
+        public async Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteGuardadoAsync(int reporteId, System.Threading.CancellationToken cancellationToken = default)
         {
-            using var connection = _connectionFactory.CreateConnection();
-            var sql = @"
+            using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+            const string sql = @"
                 SELECT 
                     S_GRUPO, GRUPO, PRESTAMO, CREDITO_OTORGADO, CREDITO_LIQUIDADO, 
                     AMORTIZA_NUMERO, AMORTIZA_INICIO, AMORTIZA_VENCIMIENTO, S_CLAVE, S_NOMBRE, 
@@ -105,7 +105,9 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
                 FROM bitacora.ReporteProvisionDetalleGuardado
                 WHERE ReporteId = @ReporteId;";
             
-            return await connection.QueryAsync<ReporteProvisionDto>(sql, new { ReporteId = reporteId });
+            var cmd = new CommandDefinition(sql, new { ReporteId = reporteId }, cancellationToken: cancellationToken);
+            var result = await connection.QueryAsync<ReporteProvisionDto>(cmd);
+            return result.AsList();
         }
 
         public async Task<IEnumerable<ReporteProvisionGuardadoDto>> ListarReportesGuardadosAsync()

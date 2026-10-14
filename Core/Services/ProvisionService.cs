@@ -3,6 +3,7 @@ using ApiConcilacionFr.Domain.Entities;
 using ClosedXML.Excel;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using System.Data;
 using System.Text.RegularExpressions;
 using System.Linq;
@@ -12,10 +13,12 @@ namespace ApiConcilacionFr.Core.Services
     public class ProvisionService : IProvisionService
     {
         private readonly IProvisionRepository _provisionRepository;
+        private readonly IMemoryCache _cache;
 
-        public ProvisionService(IProvisionRepository provisionRepository)
+        public ProvisionService(IProvisionRepository provisionRepository, IMemoryCache cache)
         {
             _provisionRepository = provisionRepository;
+            _cache = cache;
         }
 
         public byte[] ProcesarReporteProvision(IFormFile file)
@@ -334,9 +337,21 @@ namespace ApiConcilacionFr.Core.Services
             return await _provisionRepository.GuardarReporteAsync(request, listaPrestamosStr, detalles);
         }
 
-        public async Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteGuardadoAsync(int reporteId)
+        public async Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteGuardadoAsync(int reporteId, CancellationToken cancellationToken = default)
         {
-            return await _provisionRepository.ObtenerReporteGuardadoAsync(reporteId);
+            string cacheKey = $"reporte_provision_guardado_{reporteId}";
+            if (_cache.TryGetValue(cacheKey, out IEnumerable<ReporteProvisionDto>? cachedReporte) && cachedReporte != null)
+            {
+                return cachedReporte;
+            }
+
+            var reporte = await _provisionRepository.ObtenerReporteGuardadoAsync(reporteId, cancellationToken);
+            if (reporte != null && reporte.Any())
+            {
+                _cache.Set(cacheKey, reporte, TimeSpan.FromMinutes(60));
+            }
+
+            return reporte ?? Enumerable.Empty<ReporteProvisionDto>();
         }
 
         public async Task<IEnumerable<ReporteProvisionGuardadoDto>> ListarReportesGuardadosAsync()

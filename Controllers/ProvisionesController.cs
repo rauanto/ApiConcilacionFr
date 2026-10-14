@@ -97,18 +97,23 @@ namespace ApiConcilacionFr.Controllers
         /// Obtiene el detalle de un reporte de provisión previamente guardado.
         /// </summary>
         [HttpGet("guardado/{id}")]
+        [ResponseCache(Duration = 1800, Location = ResponseCacheLocation.Client)]
         [ProducesResponseType(typeof(IEnumerable<ApiConcilacionFr.Domain.Entities.ReporteProvisionDto>), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> ObtenerReporteGuardado(int id)
+        public async Task<IActionResult> ObtenerReporteGuardado(int id, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _provisionService.ObtenerReporteGuardadoAsync(id);
+                var result = await _provisionService.ObtenerReporteGuardadoAsync(id, cancellationToken);
                 if (result == null || !result.Any())
                     return NotFound($"No se encontró un reporte guardado con el ID {id}.");
                 
                 return Ok(result);
+            }
+            catch (OperationCanceledException)
+            {
+                return StatusCode(499);
             }
             catch (Exception ex)
             {

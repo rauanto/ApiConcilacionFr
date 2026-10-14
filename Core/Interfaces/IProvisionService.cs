@@ -11,7 +11,7 @@ namespace ApiConcilacionFr.Core.Interfaces
         Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteProvisionesAsync(ReporteProvisionRequest request);
         Task<ReporteProvisionFiltrosDto> ObtenerFiltrosReporteProvisionesAsync(ReporteProvisionRequest request);
         Task<int> GenerarYGuardarReporteAsync(ReporteGuardadoRequest request);
-        Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteGuardadoAsync(int reporteId);
+        Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteGuardadoAsync(int reporteId, System.Threading.CancellationToken cancellationToken = default);
         Task<IEnumerable<ReporteProvisionGuardadoDto>> ListarReportesGuardadosAsync();
     }
 }

@@ -9,7 +9,7 @@ namespace ApiConcilacionFr.Core.Interfaces
     {
         Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteProvisionesAsync(string listaPrestamos, DateTime? fechaInicio, DateTime? fechaFin);
         Task<int> GuardarReporteAsync(ReporteGuardadoRequest request, string listaPrestamosStr, IEnumerable<ReporteProvisionDto> detalles);
-        Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteGuardadoAsync(int reporteId);
+        Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteGuardadoAsync(int reporteId, System.Threading.CancellationToken cancellationToken = default);
         Task<IEnumerable<ReporteProvisionGuardadoDto>> ListarReportesGuardadosAsync();
     }
 }
