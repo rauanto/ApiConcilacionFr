@@ -7,6 +7,8 @@ using ApiConcilacionFr.Domain.Entities;
 using ApiConcilacionFr.Infrastructure.Database;
 using Dapper;
 
+
+
 namespace ApiConcilacionFr.Infrastructure.Repositories
 {
     public class ProvisionRepository : IProvisionRepository
@@ -17,7 +19,8 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
         {
             _connectionFactory = connectionFactory;
         }
-
+        
+        //Obtener reporte de provisiones
         public async Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteProvisionesAsync(string listaPrestamos, DateTime? fechaInicio, DateTime? fechaFin, System.Threading.CancellationToken cancellationToken = default)
         {
             using var connection = await _connectionFactory.CreateOpenConnectionAsync();
@@ -34,7 +37,7 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
             var result = await connection.QueryAsync<ReporteProvisionDto>(cmd);
             return result.AsList();
         }
-
+        //insertar los datos del reporte en la tabla bitacora.ReporteProvisionGuardado y en la tabla bitacora.ReporteProvisionDetalleGuardado
         public async Task<int> GuardarReporteAsync(ReporteGuardadoRequest request, string listaPrestamosStr, IEnumerable<ReporteProvisionDto> detalles)
         {
             using var connection = _connectionFactory.CreateConnection();
@@ -56,7 +59,7 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
                     request.FechaFin,
                     ListaPrestamos = listaPrestamosStr
                 }, transaction);
-
+                //agregar cada detalla del reporte en la tabla
                 if (detalles != null && detalles.Any())
                 {
                     var sqlDetalle = @"
