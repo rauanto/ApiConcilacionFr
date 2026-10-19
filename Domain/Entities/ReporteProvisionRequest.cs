@@ -8,6 +8,7 @@ namespace ApiConcilacionFr.Domain.Entities
         // En lugar de un solo string grande, podemos recibir una lista de strings para mejor tipado en JSON,
         // y luego en el backend la unimos con string.Join(",", ListaPrestamos).
         // Sin embargo, si el usuario manda directamente un string delimitado por comas, usaremos un string.
+        public int? ReporteId { get; set; }
         public List<string> ListaPrestamos { get; set; } = new List<string>();
         
         public DateTime? FechaInicio { get; set; }

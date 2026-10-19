@@ -8,8 +8,8 @@ namespace ApiConcilacionFr.Core.Interfaces
     public interface IProvisionService
     {
         byte[] ProcesarReporteProvision(IFormFile file);
-        Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteProvisionesAsync(ReporteProvisionRequest request);
-        Task<ReporteProvisionFiltrosDto> ObtenerFiltrosReporteProvisionesAsync(ReporteProvisionRequest request);
+        Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteProvisionesAsync(ReporteProvisionRequest request, System.Threading.CancellationToken cancellationToken = default);
+        Task<ReporteProvisionFiltrosDto> ObtenerFiltrosReporteProvisionesAsync(ReporteProvisionRequest request, System.Threading.CancellationToken cancellationToken = default);
         Task<int> GenerarYGuardarReporteAsync(ReporteGuardadoRequest request);
         Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteGuardadoAsync(int reporteId, System.Threading.CancellationToken cancellationToken = default);
         Task<IEnumerable<ReporteProvisionGuardadoDto>> ListarReportesGuardadosAsync();

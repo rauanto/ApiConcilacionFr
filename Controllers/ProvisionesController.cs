@@ -42,12 +42,16 @@ namespace ApiConcilacionFr.Controllers
             }
         }
         [HttpPost("reporte")]
-        public async Task<IActionResult> ObtenerReporteProvision([FromBody] ApiConcilacionFr.Domain.Entities.ReporteProvisionRequest request)
+        public async Task<IActionResult> ObtenerReporteProvision([FromBody] ApiConcilacionFr.Domain.Entities.ReporteProvisionRequest request, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _provisionService.ObtenerReporteProvisionesAsync(request);
+                var result = await _provisionService.ObtenerReporteProvisionesAsync(request, cancellationToken);
                 return Ok(result);
+            }
+            catch (OperationCanceledException)
+            {
+                return StatusCode(499);
             }
             catch (Exception ex)
             {
@@ -61,12 +65,16 @@ namespace ApiConcilacionFr.Controllers
         [HttpPost("filtros")]
         [ProducesResponseType(typeof(ApiConcilacionFr.Domain.Entities.ReporteProvisionFiltrosDto), 200)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> ObtenerFiltrosReporteProvision([FromBody] ApiConcilacionFr.Domain.Entities.ReporteProvisionRequest request)
+        public async Task<IActionResult> ObtenerFiltrosReporteProvision([FromBody] ApiConcilacionFr.Domain.Entities.ReporteProvisionRequest request, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _provisionService.ObtenerFiltrosReporteProvisionesAsync(request);
+                var result = await _provisionService.ObtenerFiltrosReporteProvisionesAsync(request, cancellationToken);
                 return Ok(result);
+            }
+            catch (OperationCanceledException)
+            {
+                return StatusCode(499);
             }
             catch (Exception ex)
             {
@@ -118,6 +126,31 @@ namespace ApiConcilacionFr.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Error interno al consultar el reporte guardado: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los filtros correspondientes a un reporte guardado por su ID.
+        /// </summary>
+        [HttpGet("guardado/{id}/filtros")]
+        [ProducesResponseType(typeof(ApiConcilacionFr.Domain.Entities.ReporteProvisionFiltrosDto), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> ObtenerFiltrosReporteGuardado(int id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var request = new ApiConcilacionFr.Domain.Entities.ReporteProvisionRequest { ReporteId = id };
+                var result = await _provisionService.ObtenerFiltrosReporteProvisionesAsync(request, cancellationToken);
+                return Ok(result);
+            }
+            catch (OperationCanceledException)
+            {
+                return StatusCode(499);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno al generar los filtros del reporte guardado: {ex.Message}");
             }
         }
 

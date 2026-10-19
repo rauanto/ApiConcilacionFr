@@ -18,20 +18,21 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
             _connectionFactory = connectionFactory;
         }
 
-        public async Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteProvisionesAsync(string listaPrestamos, DateTime? fechaInicio, DateTime? fechaFin)
+        public async Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteProvisionesAsync(string listaPrestamos, DateTime? fechaInicio, DateTime? fechaFin, System.Threading.CancellationToken cancellationToken = default)
         {
-            using var connection = _connectionFactory.CreateConnection();
+            using var connection = await _connectionFactory.CreateOpenConnectionAsync();
             
-            var sql = "CALL sp_ReporteProvicion(@p_lista_prestamos, @p_fecha_inicio, @p_fecha_fin);";
+            const string sql = "CALL sp_ReporteProvicion(@p_lista_prestamos, @p_fecha_inicio, @p_fecha_fin);";
             
-            var result = await connection.QueryAsync<ReporteProvisionDto>(sql, new 
+            var cmd = new CommandDefinition(sql, new 
             { 
                 p_lista_prestamos = listaPrestamos,
                 p_fecha_inicio = fechaInicio,
                 p_fecha_fin = fechaFin
-            });
-            
-            return result;
+            }, cancellationToken: cancellationToken);
+
+            var result = await connection.QueryAsync<ReporteProvisionDto>(cmd);
+            return result.AsList();
         }
 
         public async Task<int> GuardarReporteAsync(ReporteGuardadoRequest request, string listaPrestamosStr, IEnumerable<ReporteProvisionDto> detalles)
@@ -63,11 +64,13 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
                             ReporteId, S_GRUPO, GRUPO, PRESTAMO, CREDITO_OTORGADO, CREDITO_LIQUIDADO, 
                             AMORTIZA_NUMERO, AMORTIZA_INICIO, AMORTIZA_VENCIMIENTO, S_CLAVE, S_NOMBRE, 
                             PRIMERA_AMORTIZACION, IMPORTE_AMORTIZACION, ABONADO, SALDO_AMORTIZACION, 
+                            INTERES_AMORTIZACION, IVA_AMORTIZACION,
                             DIAS_ATRASO, MESES_ATRASO, ULTIMO_PAGO, DIAS_SIN_PAGAR, PAGO_SOSTENIDO
                         ) VALUES (
                             @ReporteId, @S_GRUPO, @GRUPO, @PRESTAMO, @CREDITO_OTORGADO, @CREDITO_LIQUIDADO, 
                             @AMORTIZA_NUMERO, @AMORTIZA_INICIO, @AMORTIZA_VENCIMIENTO, @S_CLAVE, @S_NOMBRE, 
                             @PRIMERA_AMORTIZACION, @IMPORTE_AMORTIZACION, @ABONADO, @SALDO_AMORTIZACION, 
+                            @INTERES_AMORTIZACION, @IVA_AMORTIZACION,
                             @DIAS_ATRASO, @MESES_ATRASO, @ULTIMO_PAGO, @DIAS_SIN_PAGAR, @PAGO_SOSTENIDO
                         );";
                     
@@ -77,6 +80,7 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
                         d.S_GRUPO, d.GRUPO, d.PRESTAMO, d.CREDITO_OTORGADO, d.CREDITO_LIQUIDADO,
                         d.AMORTIZA_NUMERO, d.AMORTIZA_INICIO, d.AMORTIZA_VENCIMIENTO, d.S_CLAVE, d.S_NOMBRE,
                         d.PRIMERA_AMORTIZACION, d.IMPORTE_AMORTIZACION, d.ABONADO, d.SALDO_AMORTIZACION,
+                        d.INTERES_AMORTIZACION, d.IVA_AMORTIZACION,
                         d.DIAS_ATRASO, d.MESES_ATRASO, d.ULTIMO_PAGO, d.DIAS_SIN_PAGAR, d.PAGO_SOSTENIDO
                     }).ToList();
 
@@ -101,6 +105,7 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
                     S_GRUPO, GRUPO, PRESTAMO, CREDITO_OTORGADO, CREDITO_LIQUIDADO, 
                     AMORTIZA_NUMERO, AMORTIZA_INICIO, AMORTIZA_VENCIMIENTO, S_CLAVE, S_NOMBRE, 
                     PRIMERA_AMORTIZACION, IMPORTE_AMORTIZACION, ABONADO, SALDO_AMORTIZACION, 
+                    INTERES_AMORTIZACION, IVA_AMORTIZACION,
                     DIAS_ATRASO, MESES_ATRASO, ULTIMO_PAGO, DIAS_SIN_PAGAR, PAGO_SOSTENIDO
                 FROM bitacora.ReporteProvisionDetalleGuardado
                 WHERE ReporteId = @ReporteId;";

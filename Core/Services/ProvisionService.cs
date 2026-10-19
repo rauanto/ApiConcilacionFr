@@ -7,6 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Data;
 using System.Text.RegularExpressions;
 using System.Linq;
+using Dapper;
 
 namespace ApiConcilacionFr.Core.Services
 {
@@ -254,77 +255,239 @@ namespace ApiConcilacionFr.Core.Services
             return null;
         }
 
-        public async Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteProvisionesAsync(ReporteProvisionRequest request)
+        private static string GenerarCacheKey(string listaPrestamos, DateTime? inicio, DateTime? fin)
         {
-            string listaPrestamos = request?.ListaPrestamos != null ? string.Join(",", request.ListaPrestamos) : "";
-            return await _provisionRepository.ObtenerReporteProvisionesAsync(listaPrestamos, request?.FechaInicio, request?.FechaFin);
+            string raw = $"{listaPrestamos}_{inicio:yyyyMMdd}_{fin:yyyyMMdd}";
+            if (raw.Length <= 64) return $"provision_rep_{raw}";
+            return $"provision_rep_{Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(raw)))}";
         }
 
-        public async Task<ReporteProvisionFiltrosDto> ObtenerFiltrosReporteProvisionesAsync(ReporteProvisionRequest request)
+        public async Task<IEnumerable<ReporteProvisionDto>> ObtenerReporteProvisionesAsync(ReporteProvisionRequest request, CancellationToken cancellationToken = default)
         {
-            var datos = (await ObtenerReporteProvisionesAsync(request)).ToList();
+            string listaPrestamos = request?.ListaPrestamos != null && request.ListaPrestamos.Count > 0
+                ? string.Join(",", request.ListaPrestamos.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).OrderBy(x => x))
+                : "";
+            string cacheKey = GenerarCacheKey(listaPrestamos, request?.FechaInicio, request?.FechaFin);
+
+            if (_cache.TryGetValue(cacheKey, out IEnumerable<ReporteProvisionDto>? cached) && cached != null)
+            {
+                return cached;
+            }
+
+            var result = await _provisionRepository.ObtenerReporteProvisionesAsync(listaPrestamos, request?.FechaInicio, request?.FechaFin, cancellationToken);
+            var list = result.AsList();
+            if (list.Count > 0)
+            {
+                _cache.Set(cacheKey, list, TimeSpan.FromMinutes(3));
+            }
+
+            return list;
+        }
+
+        public async Task<ReporteProvisionFiltrosDto> ObtenerFiltrosReporteProvisionesAsync(ReporteProvisionRequest request, CancellationToken cancellationToken = default)
+        {
+            IEnumerable<ReporteProvisionDto> datos;
+            if (request?.ReporteId.HasValue == true && request.ReporteId.Value > 0)
+            {
+                datos = await ObtenerReporteGuardadoAsync(request.ReporteId.Value, cancellationToken);
+            }
+            else
+            {
+                datos = await ObtenerReporteProvisionesAsync(request, cancellationToken);
+            }
+
             var filtros = new ReporteProvisionFiltrosDto();
 
-            if (!datos.Any()) return filtros;
+            var sGrupoSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var grupoSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var pagoSostenidoSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var interesAmortizacionSet = new HashSet<decimal>();
+            var ivaAmortizacionSet = new HashSet<decimal>();
 
-            filtros.S_GRUPO.Valores = datos.Where(x => !string.IsNullOrEmpty(x.S_GRUPO)).Select(x => x.S_GRUPO!).Distinct().OrderBy(x => x).ToList();
-            filtros.GRUPO.Valores = datos.Where(x => !string.IsNullOrEmpty(x.GRUPO)).Select(x => x.GRUPO!).Distinct().OrderBy(x => x).ToList();
-            filtros.PAGO_SOSTENIDO.Valores = datos.Where(x => !string.IsNullOrEmpty(x.PAGO_SOSTENIDO)).Select(x => x.PAGO_SOSTENIDO!).Distinct().OrderBy(x => x).ToList();
+            DateOnly? minCreditoOtorgado = null, maxCreditoOtorgado = null;
+            DateOnly? minCreditoLiquidado = null, maxCreditoLiquidado = null;
+            DateOnly? minAmortizaInicio = null, maxAmortizaInicio = null;
+            DateOnly? minAmortizaVencimiento = null, maxAmortizaVencimiento = null;
+            DateOnly? minUltimoPago = null, maxUltimoPago = null;
 
-            filtros.CREDITO_OTORGADO.Min = datos.Where(x => x.CREDITO_OTORGADO.HasValue).Min(x => x.CREDITO_OTORGADO);
-            filtros.CREDITO_OTORGADO.Max = datos.Where(x => x.CREDITO_OTORGADO.HasValue).Max(x => x.CREDITO_OTORGADO);
+            decimal? minPrestamo = null, maxPrestamo = null;
+            decimal? minSClave = null, maxSClave = null;
+            decimal? minAmortizaNumero = null, maxAmortizaNumero = null;
+            decimal? minPrimeraAmortizacion = null, maxPrimeraAmortizacion = null;
+            decimal? minImporteAmortizacion = null, maxImporteAmortizacion = null;
+            decimal? minAbonado = null, maxAbonado = null;
+            decimal? minSaldoAmortizacion = null, maxSaldoAmortizacion = null;
+            decimal? minInteresAmortizacion = null, maxInteresAmortizacion = null;
+            decimal? minIvaAmortizacion = null, maxIvaAmortizacion = null;
+            decimal? minDiasAtraso = null, maxDiasAtraso = null;
+            decimal? minMesesAtraso = null, maxMesesAtraso = null;
+            decimal? minDiasSinPagar = null, maxDiasSinPagar = null;
 
-            filtros.CREDITO_LIQUIDADO.Min = datos.Where(x => x.CREDITO_LIQUIDADO.HasValue).Min(x => x.CREDITO_LIQUIDADO);
-            filtros.CREDITO_LIQUIDADO.Max = datos.Where(x => x.CREDITO_LIQUIDADO.HasValue).Max(x => x.CREDITO_LIQUIDADO);
+            bool hasData = false;
 
-            filtros.AMORTIZA_INICIO.Min = datos.Where(x => x.AMORTIZA_INICIO.HasValue).Min(x => x.AMORTIZA_INICIO);
-            filtros.AMORTIZA_INICIO.Max = datos.Where(x => x.AMORTIZA_INICIO.HasValue).Max(x => x.AMORTIZA_INICIO);
-
-            filtros.AMORTIZA_VENCIMIENTO.Min = datos.Where(x => x.AMORTIZA_VENCIMIENTO.HasValue).Min(x => x.AMORTIZA_VENCIMIENTO);
-            filtros.AMORTIZA_VENCIMIENTO.Max = datos.Where(x => x.AMORTIZA_VENCIMIENTO.HasValue).Max(x => x.AMORTIZA_VENCIMIENTO);
-
-            filtros.ULTIMO_PAGO.Min = datos.Where(x => x.ULTIMO_PAGO.HasValue).Min(x => x.ULTIMO_PAGO);
-            filtros.ULTIMO_PAGO.Max = datos.Where(x => x.ULTIMO_PAGO.HasValue).Max(x => x.ULTIMO_PAGO);
-
-            decimal ParseDecimal(string? val) => decimal.TryParse(val, out var d) ? d : 0;
-
-            var prestamosNum = datos.Select(x => ParseDecimal(x.PRESTAMO)).Where(x => x > 0).ToList();
-            if (prestamosNum.Any())
+            // Recorrido único O(N) para todos los campos
+            foreach (var row in datos)
             {
-                filtros.PRESTAMO.Min = prestamosNum.Min();
-                filtros.PRESTAMO.Max = prestamosNum.Max();
+                hasData = true;
+
+                // Catálogos
+                if (!string.IsNullOrWhiteSpace(row.S_GRUPO)) sGrupoSet.Add(row.S_GRUPO.Trim());
+                if (!string.IsNullOrWhiteSpace(row.GRUPO)) grupoSet.Add(row.GRUPO.Trim());
+                if (!string.IsNullOrWhiteSpace(row.PAGO_SOSTENIDO)) pagoSostenidoSet.Add(row.PAGO_SOSTENIDO.Trim());
+
+                // Fechas
+                if (row.CREDITO_OTORGADO.HasValue)
+                {
+                    var val = row.CREDITO_OTORGADO.Value;
+                    if (!minCreditoOtorgado.HasValue || val < minCreditoOtorgado.Value) minCreditoOtorgado = val;
+                    if (!maxCreditoOtorgado.HasValue || val > maxCreditoOtorgado.Value) maxCreditoOtorgado = val;
+                }
+                if (row.CREDITO_LIQUIDADO.HasValue)
+                {
+                    var val = row.CREDITO_LIQUIDADO.Value;
+                    if (!minCreditoLiquidado.HasValue || val < minCreditoLiquidado.Value) minCreditoLiquidado = val;
+                    if (!maxCreditoLiquidado.HasValue || val > maxCreditoLiquidado.Value) maxCreditoLiquidado = val;
+                }
+                if (row.AMORTIZA_INICIO.HasValue)
+                {
+                    var val = row.AMORTIZA_INICIO.Value;
+                    if (!minAmortizaInicio.HasValue || val < minAmortizaInicio.Value) minAmortizaInicio = val;
+                    if (!maxAmortizaInicio.HasValue || val > maxAmortizaInicio.Value) maxAmortizaInicio = val;
+                }
+                if (row.AMORTIZA_VENCIMIENTO.HasValue)
+                {
+                    var val = row.AMORTIZA_VENCIMIENTO.Value;
+                    if (!minAmortizaVencimiento.HasValue || val < minAmortizaVencimiento.Value) minAmortizaVencimiento = val;
+                    if (!maxAmortizaVencimiento.HasValue || val > maxAmortizaVencimiento.Value) maxAmortizaVencimiento = val;
+                }
+                if (row.ULTIMO_PAGO.HasValue)
+                {
+                    var val = row.ULTIMO_PAGO.Value;
+                    if (!minUltimoPago.HasValue || val < minUltimoPago.Value) minUltimoPago = val;
+                    if (!maxUltimoPago.HasValue || val > maxUltimoPago.Value) maxUltimoPago = val;
+                }
+
+                // Strings numéricos (PRESTAMO y S_CLAVE)
+                if (!string.IsNullOrEmpty(row.PRESTAMO) && decimal.TryParse(row.PRESTAMO, out var pVal) && pVal > 0)
+                {
+                    if (!minPrestamo.HasValue || pVal < minPrestamo.Value) minPrestamo = pVal;
+                    if (!maxPrestamo.HasValue || pVal > maxPrestamo.Value) maxPrestamo = pVal;
+                }
+                if (!string.IsNullOrEmpty(row.S_CLAVE) && decimal.TryParse(row.S_CLAVE, out var scVal) && scVal > 0)
+                {
+                    if (!minSClave.HasValue || scVal < minSClave.Value) minSClave = scVal;
+                    if (!maxSClave.HasValue || scVal > maxSClave.Value) maxSClave = scVal;
+                }
+
+                // Números
+                if (row.AMORTIZA_NUMERO.HasValue)
+                {
+                    var val = row.AMORTIZA_NUMERO.Value;
+                    if (!minAmortizaNumero.HasValue || val < minAmortizaNumero.Value) minAmortizaNumero = val;
+                    if (!maxAmortizaNumero.HasValue || val > maxAmortizaNumero.Value) maxAmortizaNumero = val;
+                }
+                if (row.PRIMERA_AMORTIZACION.HasValue)
+                {
+                    var val = row.PRIMERA_AMORTIZACION.Value;
+                    if (!minPrimeraAmortizacion.HasValue || val < minPrimeraAmortizacion.Value) minPrimeraAmortizacion = val;
+                    if (!maxPrimeraAmortizacion.HasValue || val > maxPrimeraAmortizacion.Value) maxPrimeraAmortizacion = val;
+                }
+                if (row.IMPORTE_AMORTIZACION.HasValue)
+                {
+                    var val = row.IMPORTE_AMORTIZACION.Value;
+                    if (!minImporteAmortizacion.HasValue || val < minImporteAmortizacion.Value) minImporteAmortizacion = val;
+                    if (!maxImporteAmortizacion.HasValue || val > maxImporteAmortizacion.Value) maxImporteAmortizacion = val;
+                }
+                if (row.ABONADO.HasValue)
+                {
+                    var val = row.ABONADO.Value;
+                    if (!minAbonado.HasValue || val < minAbonado.Value) minAbonado = val;
+                    if (!maxAbonado.HasValue || val > maxAbonado.Value) maxAbonado = val;
+                }
+                if (row.SALDO_AMORTIZACION.HasValue)
+                {
+                    var val = row.SALDO_AMORTIZACION.Value;
+                    if (!minSaldoAmortizacion.HasValue || val < minSaldoAmortizacion.Value) minSaldoAmortizacion = val;
+                    if (!maxSaldoAmortizacion.HasValue || val > maxSaldoAmortizacion.Value) maxSaldoAmortizacion = val;
+                }
+                if (row.INTERES_AMORTIZACION.HasValue)
+                {
+                    var val = row.INTERES_AMORTIZACION.Value;
+                    if (!minInteresAmortizacion.HasValue || val < minInteresAmortizacion.Value) minInteresAmortizacion = val;
+                    if (!maxInteresAmortizacion.HasValue || val > maxInteresAmortizacion.Value) maxInteresAmortizacion = val;
+                    interesAmortizacionSet.Add(val);
+                }
+                if (row.IVA_AMORTIZACION.HasValue)
+                {
+                    var val = row.IVA_AMORTIZACION.Value;
+                    if (!minIvaAmortizacion.HasValue || val < minIvaAmortizacion.Value) minIvaAmortizacion = val;
+                    if (!maxIvaAmortizacion.HasValue || val > maxIvaAmortizacion.Value) maxIvaAmortizacion = val;
+                    ivaAmortizacionSet.Add(val);
+                }
+                if (row.DIAS_ATRASO.HasValue)
+                {
+                    var val = row.DIAS_ATRASO.Value;
+                    if (!minDiasAtraso.HasValue || val < minDiasAtraso.Value) minDiasAtraso = val;
+                    if (!maxDiasAtraso.HasValue || val > maxDiasAtraso.Value) maxDiasAtraso = val;
+                }
+                if (row.MESES_ATRASO.HasValue)
+                {
+                    var val = row.MESES_ATRASO.Value;
+                    if (!minMesesAtraso.HasValue || val < minMesesAtraso.Value) minMesesAtraso = val;
+                    if (!maxMesesAtraso.HasValue || val > maxMesesAtraso.Value) maxMesesAtraso = val;
+                }
+                if (row.DIAS_SIN_PAGAR.HasValue)
+                {
+                    var val = row.DIAS_SIN_PAGAR.Value;
+                    if (!minDiasSinPagar.HasValue || val < minDiasSinPagar.Value) minDiasSinPagar = val;
+                    if (!maxDiasSinPagar.HasValue || val > maxDiasSinPagar.Value) maxDiasSinPagar = val;
+                }
             }
 
-            var sClaveNum = datos.Select(x => ParseDecimal(x.S_CLAVE)).Where(x => x > 0).ToList();
-            if (sClaveNum.Any())
-            {
-                filtros.S_CLAVE.Min = sClaveNum.Min();
-                filtros.S_CLAVE.Max = sClaveNum.Max();
-            }
+            if (!hasData) return filtros;
 
-            filtros.AMORTIZA_NUMERO.Min = datos.Where(x => x.AMORTIZA_NUMERO.HasValue).Min(x => x.AMORTIZA_NUMERO);
-            filtros.AMORTIZA_NUMERO.Max = datos.Where(x => x.AMORTIZA_NUMERO.HasValue).Max(x => x.AMORTIZA_NUMERO);
+            // Ordenamiento únicamente sobre los valores distintos filtrados
+            filtros.S_GRUPO.Valores = sGrupoSet.OrderBy(x => x).ToList();
+            filtros.GRUPO.Valores = grupoSet.OrderBy(x => x).ToList();
+            filtros.PAGO_SOSTENIDO.Valores = pagoSostenidoSet.OrderBy(x => x).ToList();
 
-            filtros.PRIMERA_AMORTIZACION.Min = datos.Where(x => x.PRIMERA_AMORTIZACION.HasValue).Min(x => x.PRIMERA_AMORTIZACION);
-            filtros.PRIMERA_AMORTIZACION.Max = datos.Where(x => x.PRIMERA_AMORTIZACION.HasValue).Max(x => x.PRIMERA_AMORTIZACION);
+            filtros.CREDITO_OTORGADO.Min = minCreditoOtorgado;
+            filtros.CREDITO_OTORGADO.Max = maxCreditoOtorgado;
+            filtros.CREDITO_LIQUIDADO.Min = minCreditoLiquidado;
+            filtros.CREDITO_LIQUIDADO.Max = maxCreditoLiquidado;
+            filtros.AMORTIZA_INICIO.Min = minAmortizaInicio;
+            filtros.AMORTIZA_INICIO.Max = maxAmortizaInicio;
+            filtros.AMORTIZA_VENCIMIENTO.Min = minAmortizaVencimiento;
+            filtros.AMORTIZA_VENCIMIENTO.Max = maxAmortizaVencimiento;
+            filtros.ULTIMO_PAGO.Min = minUltimoPago;
+            filtros.ULTIMO_PAGO.Max = maxUltimoPago;
 
-            filtros.IMPORTE_AMORTIZACION.Min = datos.Where(x => x.IMPORTE_AMORTIZACION.HasValue).Min(x => x.IMPORTE_AMORTIZACION);
-            filtros.IMPORTE_AMORTIZACION.Max = datos.Where(x => x.IMPORTE_AMORTIZACION.HasValue).Max(x => x.IMPORTE_AMORTIZACION);
-
-            filtros.ABONADO.Min = datos.Where(x => x.ABONADO.HasValue).Min(x => x.ABONADO);
-            filtros.ABONADO.Max = datos.Where(x => x.ABONADO.HasValue).Max(x => x.ABONADO);
-
-            filtros.SALDO_AMORTIZACION.Min = datos.Where(x => x.SALDO_AMORTIZACION.HasValue).Min(x => x.SALDO_AMORTIZACION);
-            filtros.SALDO_AMORTIZACION.Max = datos.Where(x => x.SALDO_AMORTIZACION.HasValue).Max(x => x.SALDO_AMORTIZACION);
-
-            filtros.DIAS_ATRASO.Min = datos.Where(x => x.DIAS_ATRASO.HasValue).Min(x => x.DIAS_ATRASO);
-            filtros.DIAS_ATRASO.Max = datos.Where(x => x.DIAS_ATRASO.HasValue).Max(x => x.DIAS_ATRASO);
-
-            filtros.MESES_ATRASO.Min = datos.Where(x => x.MESES_ATRASO.HasValue).Min(x => x.MESES_ATRASO);
-            filtros.MESES_ATRASO.Max = datos.Where(x => x.MESES_ATRASO.HasValue).Max(x => x.MESES_ATRASO);
-
-            filtros.DIAS_SIN_PAGAR.Min = datos.Where(x => x.DIAS_SIN_PAGAR.HasValue).Min(x => x.DIAS_SIN_PAGAR);
-            filtros.DIAS_SIN_PAGAR.Max = datos.Where(x => x.DIAS_SIN_PAGAR.HasValue).Max(x => x.DIAS_SIN_PAGAR);
+            filtros.PRESTAMO.Min = minPrestamo;
+            filtros.PRESTAMO.Max = maxPrestamo;
+            filtros.S_CLAVE.Min = minSClave;
+            filtros.S_CLAVE.Max = maxSClave;
+            filtros.AMORTIZA_NUMERO.Min = minAmortizaNumero;
+            filtros.AMORTIZA_NUMERO.Max = maxAmortizaNumero;
+            filtros.PRIMERA_AMORTIZACION.Min = minPrimeraAmortizacion;
+            filtros.PRIMERA_AMORTIZACION.Max = maxPrimeraAmortizacion;
+            filtros.IMPORTE_AMORTIZACION.Min = minImporteAmortizacion;
+            filtros.IMPORTE_AMORTIZACION.Max = maxImporteAmortizacion;
+            filtros.ABONADO.Min = minAbonado;
+            filtros.ABONADO.Max = maxAbonado;
+            filtros.SALDO_AMORTIZACION.Min = minSaldoAmortizacion;
+            filtros.SALDO_AMORTIZACION.Max = maxSaldoAmortizacion;
+            filtros.INTERES_AMORTIZACION.Min = minInteresAmortizacion;
+            filtros.INTERES_AMORTIZACION.Max = maxInteresAmortizacion;
+            filtros.INTERES_AMORTIZACION.Valores = interesAmortizacionSet.OrderBy(x => x).ToList();
+            filtros.IVA_AMORTIZACION.Min = minIvaAmortizacion;
+            filtros.IVA_AMORTIZACION.Max = maxIvaAmortizacion;
+            filtros.IVA_AMORTIZACION.Valores = ivaAmortizacionSet.OrderBy(x => x).ToList();
+            filtros.DIAS_ATRASO.Min = minDiasAtraso;
+            filtros.DIAS_ATRASO.Max = maxDiasAtraso;
+            filtros.MESES_ATRASO.Min = minMesesAtraso;
+            filtros.MESES_ATRASO.Max = maxMesesAtraso;
+            filtros.DIAS_SIN_PAGAR.Min = minDiasSinPagar;
+            filtros.DIAS_SIN_PAGAR.Max = maxDiasSinPagar;
 
             return filtros;
         }

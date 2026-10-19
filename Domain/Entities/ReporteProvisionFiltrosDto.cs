@@ -7,6 +7,7 @@ namespace ApiConcilacionFr.Domain.Entities
     {
         public decimal? Min { get; set; }
         public decimal? Max { get; set; }
+        public List<decimal> Valores { get; set; } = new List<decimal>();
     }
 
     public class RangoFechaFiltro
@@ -35,6 +36,8 @@ namespace ApiConcilacionFr.Domain.Entities
         public RangoNumeroFiltro IMPORTE_AMORTIZACION { get; set; } = new RangoNumeroFiltro();
         public RangoNumeroFiltro ABONADO { get; set; } = new RangoNumeroFiltro();
         public RangoNumeroFiltro SALDO_AMORTIZACION { get; set; } = new RangoNumeroFiltro();
+        public RangoNumeroFiltro INTERES_AMORTIZACION { get; set; } = new RangoNumeroFiltro();
+        public RangoNumeroFiltro IVA_AMORTIZACION { get; set; } = new RangoNumeroFiltro();
         public RangoNumeroFiltro DIAS_ATRASO { get; set; } = new RangoNumeroFiltro();
         public RangoNumeroFiltro MESES_ATRASO { get; set; } = new RangoNumeroFiltro();
         public RangoFechaFiltro ULTIMO_PAGO { get; set; } = new RangoFechaFiltro();

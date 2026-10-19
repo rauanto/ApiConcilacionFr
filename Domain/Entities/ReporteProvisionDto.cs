@@ -16,6 +16,8 @@ namespace ApiConcilacionFr.Domain.Entities
         public decimal? IMPORTE_AMORTIZACION { get; set; }
         public decimal? ABONADO { get; set; }
         public decimal? SALDO_AMORTIZACION { get; set; }
+        public decimal? INTERES_AMORTIZACION { get; set; }
+        public decimal? IVA_AMORTIZACION { get; set; }
         public int? DIAS_ATRASO { get; set; }
         public int? MESES_ATRASO { get; set; }
         public DateOnly? ULTIMO_PAGO { get; set; }
