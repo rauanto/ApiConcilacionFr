@@ -25,7 +25,7 @@ public class ReportesCarteraController : ControllerBase
     public async Task<IActionResult> GetHistoricoCartera([FromQuery] DateTime fechaReporte, [FromQuery] int tipoReporte)
     {
         var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
-        var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+        var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
                            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
@@ -43,7 +43,7 @@ public class ReportesCarteraController : ControllerBase
             return BadRequest(ApiResponse<object>.Failure("Debes proporcionar un tipo de reporte válido."));
         }
 
-        var resultado = await _reporteRepo.GetCarteraEjecutivoHistoricoAsync(fechaReporte, userId, rolName,tipoReporte);
+        var resultado = await _reporteRepo.GetCarteraEjecutivoHistoricoAsync(fechaReporte, userId, rolName, tipoReporte);
 
         return Ok(ApiResponse<IEnumerable<ReporteCarteraEjecutivoHistorico>>.Success(resultado, "Reporte de cartera histórico generado con éxito."));
     }
@@ -52,7 +52,7 @@ public class ReportesCarteraController : ControllerBase
     public async Task<IActionResult> GetFechasReporte()
     {
         var rolName = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
-        var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+        var userIdString = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
                            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
