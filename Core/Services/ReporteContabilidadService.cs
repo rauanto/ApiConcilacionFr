@@ -1,3 +1,4 @@
+using ApiConcilacionFr.Common;
 using ApiConcilacionFr.Core.Interfaces;
 using ApiConcilacionFr.Domain.Entities;
 
@@ -20,6 +21,13 @@ public class ReporteContabilidadService : IReporteContabilidadService
         return _repository.ListarReportesContabilidadAsync(sufijoMes);
     }
 
+    public Task<IEnumerable<ReporteContabilidad>> ListarReportesContabilidadPorEtapaAsync(int mes, string etapa)
+    {
+        var sufijoMes = ConvertirMesASufijo(mes);
+        var etapaNormalizada = ConvertirEtapa(etapa);
+        return _repository.ListarReportesContabilidadPorEtapaAsync(sufijoMes, etapaNormalizada);
+    }
+
     private static string ConvertirMesASufijo(int mes)
     {
         if (mes < MesMinimo || mes > MesMaximo)
@@ -31,5 +39,21 @@ public class ReporteContabilidadService : IReporteContabilidadService
         }
 
         return $"MES{mes}";
+    }
+
+    private static string ConvertirEtapa(string etapa)
+    {
+        if (string.IsNullOrWhiteSpace(etapa))
+        {
+            throw new BadRequestException("La etapa debe ser 1, 2, 3 o TODAS.");
+        }
+
+        var etapaNormalizada = etapa.Trim().ToUpperInvariant();
+        if (etapaNormalizada is not ("1" or "2" or "3" or "TODAS"))
+        {
+            throw new BadRequestException("La etapa debe ser 1, 2, 3 o TODAS.");
+        }
+
+        return etapaNormalizada;
     }
 }

@@ -28,5 +28,18 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
                 new { p_mes = sufijoMes },
                 commandType: CommandType.StoredProcedure);
         }
+
+        public async Task<IEnumerable<ReporteContabilidad>> ListarReportesContabilidadPorEtapaAsync(
+            string sufijoMes,
+            string etapa)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+
+            const string procedimiento = "sp_obtener_saldos_contables_por_etapa";
+            return await connection.QueryAsync<ReporteContabilidad>(
+                procedimiento,
+                new { p_mes = sufijoMes, p_etapa = etapa },
+                commandType: CommandType.StoredProcedure);
+        }
     }
 }

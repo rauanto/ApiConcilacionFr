@@ -4,4 +4,8 @@ GET {{ApiConcilacionFr_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+### Descargar reporte contable en PDF por etapa (1, 2, 3 o todas)
+GET {{ApiConcilacionFr_HostAddress}}/api/ReporteContabilidad/reportes-contabilidad/pdf?mes=3&etapa=todas
+Accept: application/pdf
   

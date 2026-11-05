@@ -88,6 +88,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddScoped<IReporteRepository, ReporteRepository>();
     builder.Services.AddScoped<IReporteContabilidadRepository, ReporteContabilidadRepository>();
     builder.Services.AddScoped<IReporteContabilidadService, ReporteContabilidadService>();
+    builder.Services.AddScoped<IReporteContabilidadPdfService, ReporteContabilidadPdfService>();
     builder.Services.AddScoped<IBitacoraRepository, BitacoraRepository>();
     builder.Services.AddScoped<IBitacoraArchivoRepository, BitacoraArchivoRepository>();
     builder.Services.AddScoped<IBitacoraBajasRepository, BitacoraBajasRepository>();
