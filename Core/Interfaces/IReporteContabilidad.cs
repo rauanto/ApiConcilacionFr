@@ -7,6 +7,6 @@ namespace ApiConcilacionFr.Core.Interfaces
 {
     public interface IReporteContabilidadRepository
     {
-        Task<IEnumerable<ReporteContabilidad>> ListarReportesContabilidadGuardadosAsync();
+        Task<IEnumerable<ReporteContabilidad>> ListarReportesContabilidadAsync(string sufijoMes);
     }
 }

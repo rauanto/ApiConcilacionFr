@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Linq;
 using ApiConcilacionFr.Core.Interfaces;
 using ApiConcilacionFr.Domain.Entities;
 using ApiConcilacionFr.Infrastructure.Database;
 using Dapper;
+using System.Data;
 
 
 namespace ApiConcilacionFr.Infrastructure.Repositories
@@ -19,15 +18,15 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
             _connectionFactory = connectionFactory;
         }
 
-        //Listar reportes de contabilidad guardados
-        public async Task<IEnumerable<ReporteContabilidad>> ListarReportesContabilidadGuardadosAsync()
+        public async Task<IEnumerable<ReporteContabilidad>> ListarReportesContabilidadAsync(string sufijoMes)
         {
-            using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-            
-            const string sql = "call sp_obtener_saldos_contables();";
-            
-            var result = await connection.QueryAsync<ReporteContabilidad>(sql);
-            return result.AsList();
+            using var connection = _connectionFactory.CreateConnection();
+
+            const string procedimiento = "sp_obtener_saldos_contables";
+            return await connection.QueryAsync<ReporteContabilidad>(
+                procedimiento,
+                new { p_mes = sufijoMes },
+                commandType: CommandType.StoredProcedure);
         }
     }
 }

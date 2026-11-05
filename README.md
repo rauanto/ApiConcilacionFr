@@ -1,0 +1,1 @@
+dotnet publish .\ApiConcilacionFr.csproj --configuration Release --output .\publish

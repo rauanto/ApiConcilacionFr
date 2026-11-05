@@ -2,8 +2,8 @@ using ApiConcilacionFr.Common;
 using ApiConcilacionFr.Domain.Entities;
 using ApiConcilacionFr.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace ApiConcilacionFr.Controllers
@@ -13,19 +13,19 @@ namespace ApiConcilacionFr.Controllers
     [Authorize] // Assuming you want it protected, remove if not
     public class ReporteContabilidadController : ControllerBase
     {
-        private readonly IReporteContabilidadRepository _reporteContabilidadRepository;
+        private readonly IReporteContabilidadService _reporteContabilidadService;
 
-        public ReporteContabilidadController(IReporteContabilidadRepository reporteContabilidadRepository)
+        public ReporteContabilidadController(IReporteContabilidadService reporteContabilidadService)
         {
-            _reporteContabilidadRepository = reporteContabilidadRepository;
+            _reporteContabilidadService = reporteContabilidadService;
         }
 
         [HttpGet("reportes-contabilidad")]
-        public async Task<IActionResult> ListarReportesContabilidadGuardados()
+        public async Task<IActionResult> ListarReportesContabilidadGuardados([FromQuery, Range(0, 12)] int mes)
         {
             try
             {
-                var reportes = await _reporteContabilidadRepository.ListarReportesContabilidadGuardadosAsync();
+                var reportes = await _reporteContabilidadService.ListarReportesContabilidadAsync(mes);
                 return Ok(ApiResponse<IEnumerable<ReporteContabilidad>>.Success(reportes, "Reportes de contabilidad listados con éxito."));
             }
             catch (Exception ex)
