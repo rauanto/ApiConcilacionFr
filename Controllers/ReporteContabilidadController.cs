@@ -15,13 +15,16 @@ namespace ApiConcilacionFr.Controllers
     {
         private readonly IReporteContabilidadService _reporteContabilidadService;
         private readonly IReporteContabilidadPdfService _reporteContabilidadPdfService;
+        private readonly IReporteContabilidadExcelService _reporteContabilidadExcelService;
 
         public ReporteContabilidadController(
             IReporteContabilidadService reporteContabilidadService,
-            IReporteContabilidadPdfService reporteContabilidadPdfService)
+            IReporteContabilidadPdfService reporteContabilidadPdfService,
+            IReporteContabilidadExcelService reporteContabilidadExcelService)
         {
             _reporteContabilidadService = reporteContabilidadService;
             _reporteContabilidadPdfService = reporteContabilidadPdfService;
+            _reporteContabilidadExcelService = reporteContabilidadExcelService;
         }
 
         [HttpGet("reportes-contabilidad")]
@@ -42,14 +45,40 @@ namespace ApiConcilacionFr.Controllers
         [Produces("application/pdf")]
         public async Task<IActionResult> GenerarReporteContabilidadPdf(
             [FromQuery, Range(0, 12)] int mes,
-            [FromQuery] string etapa = "todas")
+            [FromQuery] string etapa = "todas",
+            [FromQuery(Name = "S_GRUPO")] int[]? sGrupos = null,
+            [FromQuery] bool indice = false)
         {
-            var pdfBytes = await _reporteContabilidadPdfService.GenerarReportePdfAsync(mes, etapa);
+            var pdfBytes = await _reporteContabilidadPdfService.GenerarReportePdfAsync(
+                mes,
+                etapa,
+                sGrupos,
+                indice);
             var etapaArchivo = etapa.Trim().ToLowerInvariant();
             return File(
                 pdfBytes,
                 "application/pdf",
                 $"ReporteSaldosContables_MES{mes}_Etapa_{etapaArchivo}.pdf");
+        }
+
+        [HttpGet("reportes-contabilidad/excel")]
+        [Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
+        public async Task<IActionResult> GenerarReporteContabilidadExcel(
+            [FromQuery, Range(0, 12)] int mes,
+            [FromQuery] string etapa = "todas",
+            [FromQuery(Name = "S_GRUPO")] int[]? sGrupos = null,
+            [FromQuery] bool indice = false)
+        {
+            var excelBytes = await _reporteContabilidadExcelService.GenerarReporteExcelAsync(
+                mes,
+                etapa,
+                sGrupos,
+                indice);
+            var etapaArchivo = etapa.Trim().ToLowerInvariant();
+            return File(
+                excelBytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"ReporteSaldosContables_MES{mes}_Etapa_{etapaArchivo}.xlsx");
         }
     }
 }

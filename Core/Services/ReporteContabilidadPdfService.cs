@@ -19,10 +19,14 @@ public sealed class ReporteContabilidadPdfService : IReporteContabilidadPdfServi
         _logger = logger;
     }
 
-    public async Task<byte[]> GenerarReportePdfAsync(int mes, string etapa)
+    public async Task<byte[]> GenerarReportePdfAsync(
+        int mes,
+        string etapa,
+        IReadOnlyCollection<int>? sGrupos,
+        bool indice)
     {
         var reportes = (await _reporteContabilidadService
-            .ListarReportesContabilidadPorEtapaAsync(mes, etapa)).ToList();
+            .ListarReportesContabilidadPorEtapaAsync(mes, etapa, sGrupos)).ToList();
 
         if (reportes.Count == 0)
         {
@@ -36,6 +40,6 @@ public sealed class ReporteContabilidadPdfService : IReporteContabilidadPdfServi
             etapa,
             reportes.Count);
 
-        return new ReporteContabilidadDocument(mes, etapa, reportes).GeneratePdf();
+        return new ReporteContabilidadDocument(mes, etapa, reportes, indice).GeneratePdf();
     }
 }

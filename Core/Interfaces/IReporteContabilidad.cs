@@ -10,6 +10,7 @@ namespace ApiConcilacionFr.Core.Interfaces
         Task<IEnumerable<ReporteContabilidad>> ListarReportesContabilidadAsync(string sufijoMes);
         Task<IEnumerable<ReporteContabilidad>> ListarReportesContabilidadPorEtapaAsync(
             string sufijoMes,
-            string etapa);
+            string etapa,
+            IReadOnlyCollection<int>? sGrupos);
     }
 }

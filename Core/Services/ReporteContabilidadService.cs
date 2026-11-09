@@ -21,11 +21,20 @@ public class ReporteContabilidadService : IReporteContabilidadService
         return _repository.ListarReportesContabilidadAsync(sufijoMes);
     }
 
-    public Task<IEnumerable<ReporteContabilidad>> ListarReportesContabilidadPorEtapaAsync(int mes, string etapa)
+    public Task<IEnumerable<ReporteContabilidad>> ListarReportesContabilidadPorEtapaAsync(
+        int mes,
+        string etapa,
+        IReadOnlyCollection<int>? sGrupos = null)
     {
         var sufijoMes = ConvertirMesASufijo(mes);
         var etapaNormalizada = ConvertirEtapa(etapa);
-        return _repository.ListarReportesContabilidadPorEtapaAsync(sufijoMes, etapaNormalizada);
+        var gruposNormalizados = sGrupos?
+            .Distinct()
+            .ToArray();
+        return _repository.ListarReportesContabilidadPorEtapaAsync(
+            sufijoMes,
+            etapaNormalizada,
+            gruposNormalizados);
     }
 
     private static string ConvertirMesASufijo(int mes)

@@ -31,14 +31,20 @@ namespace ApiConcilacionFr.Infrastructure.Repositories
 
         public async Task<IEnumerable<ReporteContabilidad>> ListarReportesContabilidadPorEtapaAsync(
             string sufijoMes,
-            string etapa)
+            string etapa,
+            IReadOnlyCollection<int>? sGrupos)
         {
             using var connection = _connectionFactory.CreateConnection();
 
             const string procedimiento = "sp_obtener_saldos_contables_por_etapa";
             return await connection.QueryAsync<ReporteContabilidad>(
                 procedimiento,
-                new { p_mes = sufijoMes, p_etapa = etapa },
+                new
+                {
+                    p_mes = sufijoMes,
+                    p_etapa = etapa,
+                    p_s_grupo = sGrupos is { Count: > 0 } ? string.Join(",", sGrupos) : null
+                },
                 commandType: CommandType.StoredProcedure);
         }
     }

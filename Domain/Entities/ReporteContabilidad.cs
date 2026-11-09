@@ -12,4 +12,6 @@ public class ReporteContabilidad
     public int ETAPA { get; set; }
     public string GRUPO { get; set; }
 
+    public string? PRESTAMOS { get; set; }
+
 }

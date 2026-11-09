@@ -1,5 +1,9 @@
 create
-    definer = raul@`%` procedure sp_obtener_saldos_contables_por_etapa(IN p_mes varchar(5), IN p_etapa varchar(5))
+    definer = raul@`%` procedure sp_obtener_saldos_contables_por_etapa(
+    IN p_mes varchar(5),
+    IN p_etapa varchar(5),
+    IN p_s_grupo TEXT
+)
 BEGIN
 
     DECLARE v_cta_base INT DEFAULT 1018;
@@ -111,7 +115,26 @@ BEGIN
                              AND A_FECHA_LIQUIDACION > CURDATE()
                            GROUP BY creditos_fincrece.Socios.S_CLAVE,
                                     creditos_fincrece.Prestamo.PQ_CLAVE) AS loan_balance
-                     WHERE loan_balance.S_CLAVE = S.S_CLAVE), 0)                               AS SALDO_INSOLUTO
+                     WHERE loan_balance.S_CLAVE = S.S_CLAVE), 0)                               AS SALDO_INSOLUTO,
+                         (SELECT GROUP_CONCAT(loan_balance.PQ_CLAVE SEPARATOR ', ') AS claves_concatenadas
+                  FROM (SELECT creditos_fincrece.Socios.S_CLAVE,
+                               creditos_fincrece.Prestamo.PQ_CLAVE,
+                               MAX(creditos_fincrece.Amortiza.A_SALDO_INSOLUTO) AS A_SALDO_INSOLUTO
+                        FROM creditos_fincrece.Socios
+                                 INNER JOIN creditos_fincrece.Prestamo
+                                            ON creditos_fincrece.Socios.S_CLAVE = creditos_fincrece.Prestamo.S_CLAVE
+                                 INNER JOIN creditos_fincrece.Amortiza
+                                            ON creditos_fincrece.Amortiza.PQ_CLAVE =
+                                               creditos_fincrece.Prestamo.PQ_CLAVE
+                                 INNER JOIN creditos_fincrece.Pobla AS p
+                                            ON creditos_fincrece.Socios.S_REGION = p.P_CLAVE
+                                 INNER JOIN creditos_fincrece.Pobla AS g
+                                            ON creditos_fincrece.Socios.S_GRUPO = g.P_CLAVE
+                        WHERE PQ_FECHA_OPERACION <= CURDATE()
+                          AND A_FECHA_LIQUIDACION > CURDATE()
+                        GROUP BY creditos_fincrece.Socios.S_CLAVE,
+                                 creditos_fincrece.Prestamo.PQ_CLAVE) AS loan_balance
+                  WHERE loan_balance.S_CLAVE = S.S_CLAVE)                                                 as PRESTAMOS
     FROM Pcontabil_2026.Catalogo C
              LEFT JOIN creditos_fincrece.Socios S ON S.S_CLAVE = C.C_SCTA5
              LEFT JOIN creditos_fincrece.Pobla P2 ON P2.P_CLAVE = S.S_GRUPO
@@ -202,7 +225,26 @@ BEGIN
                              AND A_FECHA_LIQUIDACION > CURDATE()
                            GROUP BY creditos_fincrece.Socios.S_CLAVE,
                                     creditos_fincrece.Prestamo.PQ_CLAVE) AS loan_balance
-                     WHERE loan_balance.S_CLAVE = S.S_CLAVE), 0) AS SALDO_INSOLUTO
+                     WHERE loan_balance.S_CLAVE = S.S_CLAVE), 0) AS SALDO_INSOLUTO,
+                         (SELECT GROUP_CONCAT(loan_balance.PQ_CLAVE SEPARATOR ', ') AS claves_concatenadas
+                  FROM (SELECT creditos_fincrece.Socios.S_CLAVE,
+                               creditos_fincrece.Prestamo.PQ_CLAVE,
+                               MAX(creditos_fincrece.Amortiza.A_SALDO_INSOLUTO) AS A_SALDO_INSOLUTO
+                        FROM creditos_fincrece.Socios
+                                 INNER JOIN creditos_fincrece.Prestamo
+                                            ON creditos_fincrece.Socios.S_CLAVE = creditos_fincrece.Prestamo.S_CLAVE
+                                 INNER JOIN creditos_fincrece.Amortiza
+                                            ON creditos_fincrece.Amortiza.PQ_CLAVE =
+                                               creditos_fincrece.Prestamo.PQ_CLAVE
+                                 INNER JOIN creditos_fincrece.Pobla AS p
+                                            ON creditos_fincrece.Socios.S_REGION = p.P_CLAVE
+                                 INNER JOIN creditos_fincrece.Pobla AS g
+                                            ON creditos_fincrece.Socios.S_GRUPO = g.P_CLAVE
+                        WHERE PQ_FECHA_OPERACION <= CURDATE()
+                          AND A_FECHA_LIQUIDACION > CURDATE()
+                        GROUP BY creditos_fincrece.Socios.S_CLAVE,
+                                 creditos_fincrece.Prestamo.PQ_CLAVE) AS loan_balance
+                  WHERE loan_balance.S_CLAVE = S.S_CLAVE)                                                 as PRESTAMOS
     FROM Pcontabil_2026.Catalogo C
              LEFT JOIN creditos_fincrece.Socios S ON S.S_CLAVE = C.C_SCTA6
              LEFT JOIN creditos_fincrece.Pobla P2 ON P2.P_CLAVE = S.S_GRUPO
@@ -293,7 +335,26 @@ BEGIN
                              AND A_FECHA_LIQUIDACION > CURDATE()
                            GROUP BY creditos_fincrece.Socios.S_CLAVE,
                                     creditos_fincrece.Prestamo.PQ_CLAVE) AS loan_balance
-                     WHERE loan_balance.S_CLAVE = S.S_CLAVE), 0) AS SALDO_INSOLUTO
+                     WHERE loan_balance.S_CLAVE = S.S_CLAVE), 0) AS SALDO_INSOLUTO,
+                         (SELECT GROUP_CONCAT(loan_balance.PQ_CLAVE SEPARATOR ', ') AS claves_concatenadas
+                  FROM (SELECT creditos_fincrece.Socios.S_CLAVE,
+                               creditos_fincrece.Prestamo.PQ_CLAVE,
+                               MAX(creditos_fincrece.Amortiza.A_SALDO_INSOLUTO) AS A_SALDO_INSOLUTO
+                        FROM creditos_fincrece.Socios
+                                 INNER JOIN creditos_fincrece.Prestamo
+                                            ON creditos_fincrece.Socios.S_CLAVE = creditos_fincrece.Prestamo.S_CLAVE
+                                 INNER JOIN creditos_fincrece.Amortiza
+                                            ON creditos_fincrece.Amortiza.PQ_CLAVE =
+                                               creditos_fincrece.Prestamo.PQ_CLAVE
+                                 INNER JOIN creditos_fincrece.Pobla AS p
+                                            ON creditos_fincrece.Socios.S_REGION = p.P_CLAVE
+                                 INNER JOIN creditos_fincrece.Pobla AS g
+                                            ON creditos_fincrece.Socios.S_GRUPO = g.P_CLAVE
+                        WHERE PQ_FECHA_OPERACION <= CURDATE()
+                          AND A_FECHA_LIQUIDACION > CURDATE()
+                        GROUP BY creditos_fincrece.Socios.S_CLAVE,
+                                 creditos_fincrece.Prestamo.PQ_CLAVE) AS loan_balance
+                  WHERE loan_balance.S_CLAVE = S.S_CLAVE)                                                 as PRESTAMOS
     FROM Pcontabil_2026.Catalogo C
              LEFT JOIN creditos_fincrece.Socios S ON S.S_CLAVE = C.C_SCTA7
              LEFT JOIN creditos_fincrece.Pobla P2 ON P2.P_CLAVE = S.S_GRUPO
@@ -390,7 +451,26 @@ BEGIN
                              AND A_FECHA_LIQUIDACION > CURDATE()
                            GROUP BY creditos_fincrece.Socios.S_CLAVE,
                                     creditos_fincrece.Prestamo.PQ_CLAVE) AS loan_balance
-                     WHERE loan_balance.S_CLAVE = S.S_CLAVE), 0) AS SALDO_INSOLUTO
+                     WHERE loan_balance.S_CLAVE = S.S_CLAVE), 0) AS SALDO_INSOLUTO,
+                         (SELECT GROUP_CONCAT(loan_balance.PQ_CLAVE SEPARATOR ', ') AS claves_concatenadas
+                  FROM (SELECT creditos_fincrece.Socios.S_CLAVE,
+                               creditos_fincrece.Prestamo.PQ_CLAVE,
+                               MAX(creditos_fincrece.Amortiza.A_SALDO_INSOLUTO) AS A_SALDO_INSOLUTO
+                        FROM creditos_fincrece.Socios
+                                 INNER JOIN creditos_fincrece.Prestamo
+                                            ON creditos_fincrece.Socios.S_CLAVE = creditos_fincrece.Prestamo.S_CLAVE
+                                 INNER JOIN creditos_fincrece.Amortiza
+                                            ON creditos_fincrece.Amortiza.PQ_CLAVE =
+                                               creditos_fincrece.Prestamo.PQ_CLAVE
+                                 INNER JOIN creditos_fincrece.Pobla AS p
+                                            ON creditos_fincrece.Socios.S_REGION = p.P_CLAVE
+                                 INNER JOIN creditos_fincrece.Pobla AS g
+                                            ON creditos_fincrece.Socios.S_GRUPO = g.P_CLAVE
+                        WHERE PQ_FECHA_OPERACION <= CURDATE()
+                          AND A_FECHA_LIQUIDACION > CURDATE()
+                        GROUP BY creditos_fincrece.Socios.S_CLAVE,
+                                 creditos_fincrece.Prestamo.PQ_CLAVE) AS loan_balance
+                  WHERE loan_balance.S_CLAVE = S.S_CLAVE)                                                 as PRESTAMOS
     FROM Pcontabil_2026.Catalogo C
              LEFT JOIN creditos_fincrece.Socios S
                        ON S.S_CLAVE = CASE
@@ -503,7 +583,26 @@ BEGIN
                              AND A_FECHA_LIQUIDACION > CURDATE()
                            GROUP BY creditos_fincrece.Socios.S_CLAVE,
                                     creditos_fincrece.Prestamo.PQ_CLAVE) AS loan_balance
-                     WHERE loan_balance.S_CLAVE = S.S_CLAVE), 0) AS SALDO_INSOLUTO
+                     WHERE loan_balance.S_CLAVE = S.S_CLAVE), 0) AS SALDO_INSOLUTO,
+                         (SELECT GROUP_CONCAT(loan_balance.PQ_CLAVE SEPARATOR ', ') AS claves_concatenadas
+                  FROM (SELECT creditos_fincrece.Socios.S_CLAVE,
+                               creditos_fincrece.Prestamo.PQ_CLAVE,
+                               MAX(creditos_fincrece.Amortiza.A_SALDO_INSOLUTO) AS A_SALDO_INSOLUTO
+                        FROM creditos_fincrece.Socios
+                                 INNER JOIN creditos_fincrece.Prestamo
+                                            ON creditos_fincrece.Socios.S_CLAVE = creditos_fincrece.Prestamo.S_CLAVE
+                                 INNER JOIN creditos_fincrece.Amortiza
+                                            ON creditos_fincrece.Amortiza.PQ_CLAVE =
+                                               creditos_fincrece.Prestamo.PQ_CLAVE
+                                 INNER JOIN creditos_fincrece.Pobla AS p
+                                            ON creditos_fincrece.Socios.S_REGION = p.P_CLAVE
+                                 INNER JOIN creditos_fincrece.Pobla AS g
+                                            ON creditos_fincrece.Socios.S_GRUPO = g.P_CLAVE
+                        WHERE PQ_FECHA_OPERACION <= CURDATE()
+                          AND A_FECHA_LIQUIDACION > CURDATE()
+                        GROUP BY creditos_fincrece.Socios.S_CLAVE,
+                                 creditos_fincrece.Prestamo.PQ_CLAVE) AS loan_balance
+                  WHERE loan_balance.S_CLAVE = S.S_CLAVE)                                                 as PRESTAMOS
     FROM Pcontabil_2026.Catalogo C
              LEFT JOIN creditos_fincrece.Socios S ON S.S_CLAVE = C.C_SCTA7
              LEFT JOIN creditos_fincrece.Pobla P2 ON P2.P_CLAVE = S.S_GRUPO
@@ -512,6 +611,10 @@ BEGIN
       AND C.C_SCTA7 > 0
     HAVING SALDO != 0
     ) AS reporte
-    WHERE v_etapa = 'TODAS' OR reporte.ETAPA = CAST(v_etapa AS UNSIGNED);
+    WHERE (v_etapa = 'TODAS' OR reporte.ETAPA = CAST(v_etapa AS UNSIGNED))
+      AND (
+        NULLIF(TRIM(p_s_grupo), '') IS NULL
+            OR FIND_IN_SET(CAST(reporte.S_GRUPO AS CHAR), p_s_grupo) > 0
+        );
 
 END;
