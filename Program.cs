@@ -97,6 +97,7 @@ builder.Services.AddSingleton<IAuditHelper, AuditHelper>();
     builder.Services.AddScoped<IRolesRepository, RolesRepository>();
     builder.Services.AddScoped<ISolicitudBajaRepository, SolicitudBajaRepository>();
     builder.Services.AddScoped<IProvisionRepository, ProvisionRepository>();
+    builder.Services.AddScoped<IReporteLavadoRepository, ReporteLavadoRepository>();
 
     // Servicios de negocio
     // builder.Services.AddScoped<IProductoService, ProductoService>();
